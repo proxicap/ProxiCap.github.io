@@ -14,17 +14,21 @@
 async function fetchData() {
   try {
     const res = await fetch(
-      ""https://funny-kelpie-034c79.netlify.app/.netlify/functions/update""
+      "https://funny-kelpie-034c79.netlify.app/.netlify/functions/update"
     );
     const data = await res.json();
-    document.getElementById("data").textContent =
-      JSON.stringify(data, null, 2);
-  } catch (e) {
+
+    if (Object.keys(data).length === 0) {
+      document.getElementById("data").textContent = "Waiting for data...";
+    } else {
+      document.getElementById("data").textContent =
+        JSON.stringify(data, null, 2);
+    }
+  } catch (err) {
     document.getElementById("data").textContent = "Error fetching data";
   }
 }
 
-// update every 3 seconds
 setInterval(fetchData, 3000);
 fetchData();
 </script>
