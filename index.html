@@ -6,5 +6,28 @@
 <body>
   <h1>GitHub Pages is working ✅</h1>
   <p>Waiting for Arduino data...</p>
+
+  <h2>Live Sensor Data</h2>
+<pre id="data">Waiting for data...</pre>
+
+<script>
+async function fetchData() {
+  try {
+    const res = await fetch(
+      "https://funny-kelpie-034c79.netlify.app/.netlify/functions/latest"
+    );
+    const data = await res.json();
+    document.getElementById("data").textContent =
+      JSON.stringify(data, null, 2);
+  } catch (e) {
+    document.getElementById("data").textContent = "Error fetching data";
+  }
+}
+
+// update every 3 seconds
+setInterval(fetchData, 3000);
+fetchData();
+</script>
+
 </body>
 </html>
