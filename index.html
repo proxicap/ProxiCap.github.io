@@ -1,34 +1,785 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>Arduino Live Data</title>
-</head>
-<body>
-  <h1>ProxiCap+</h1>
-<pre id="data">Waiting for data</pre>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ProxiCap+ Dashboard</title>
 
-<script>
-async function fetchData() {
-  try {
-    const res = await fetch(
-      "https://funny-kelpie-034c79.netlify.app/.netlify/functions/update"
-    );
-    const data = await res.json();
+  <style>
+    /* =========================
+       Global (Dark Tech Style)
+    ========================== */
+    :root{
+      --bg: #0f1117;
+      --panel: rgba(255,255,255,0.06);
+      --panel-2: rgba(255,255,255,0.08);
+      --border: rgba(255,255,255,0.10);
+      --text: rgba(255,255,255,0.92);
+      --muted: rgba(255,255,255,0.65);
+      --muted2: rgba(255,255,255,0.45);
 
-    if (Object.keys(data).length === 0) {
-      document.getElementById("data").textContent = "Waiting for data...";
-    } else {
-      document.getElementById("data").textContent =
-        JSON.stringify(data, null, 2);
+      --ok: #00ff15;
+      --warn: #ffea00;
+      --bad: #ff3300;
+      --accent: #00ccff;
+
+      --shadow: 0 12px 30px rgba(0,0,0,0.40);
+      --radius: 18px;
     }
-  } catch (err) {
-    document.getElementById("data").textContent = "Error fetching data";
-  }
-}
 
-setInterval(fetchData, 3000);
-fetchData();
-</script>
+    * { box-sizing: border-box; }
+    html, body { height: 100%; }
+    body{
+      margin: 0;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      background: radial-gradient(1200px 700px at 20% 10%, rgba(0,204,255,0.14), transparent 55%),
+                  radial-gradient(900px 600px at 80% 20%, rgba(0,255,21,0.10), transparent 60%),
+                  var(--bg);
+      color: var(--text);
+    }
 
+    a { color: inherit; text-decoration: none; }
+    .container{
+      width: min(1100px, 92vw);
+      margin: 0 auto;
+      padding: 28px 0 60px;
+    }
+
+    .card{
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+      backdrop-filter: blur(10px);
+    }
+
+    .card-header{
+      padding: 16px 18px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .card-title{
+      font-size: 14px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    .card-body{
+      padding: 18px;
+    }
+
+    .pill{
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: rgba(255,255,255,0.04);
+      font-weight: 700;
+      letter-spacing: 0.02em;
+      user-select: none;
+    }
+
+    .pill.ok{
+      border-color: rgba(0,255,21,0.35);
+      box-shadow: 0 0 18px rgba(0,255,21,0.12);
+    }
+    .pill.bad{
+      border-color: rgba(255,51,0,0.35);
+      box-shadow: 0 0 18px rgba(255,51,0,0.12);
+    }
+    .pill.neutral{
+      border-color: rgba(0,204,255,0.25);
+      box-shadow: 0 0 18px rgba(0,204,255,0.10);
+    }
+
+    .btn{
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      padding: 12px 16px;
+      border-radius: 14px;
+      border: 1px solid rgba(0,204,255,0.35);
+      background: rgba(0,204,255,0.10);
+      color: var(--text);
+      font-weight: 700;
+      cursor: pointer;
+      transition: transform 160ms ease, background 160ms ease, border-color 160ms ease;
+      box-shadow: 0 0 18px rgba(0,204,255,0.10);
+    }
+    .btn:hover{
+      transform: translateY(-1px);
+      background: rgba(0,204,255,0.14);
+      border-color: rgba(0,204,255,0.55);
+    }
+
+    .mono{
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    }
+
+    /* =========================
+       Loading Overlay (Uiverse)
+    ========================== */
+    #loadingScreen{
+      position: fixed;
+      inset: 0;
+      z-index: 9999;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--bg);
+      transition: opacity 500ms ease;
+    }
+
+    #loadingInner{
+      width: min(820px, 92vw);
+      text-align: center;
+      padding: 22px 14px;
+    }
+
+    #loadingTitle{
+      font-size: clamp(26px, 4vw, 44px);
+      font-weight: 900;
+      letter-spacing: 0.02em;
+      margin: 0 0 6px;
+      text-shadow: 0 0 18px rgba(0,204,255,0.20);
+    }
+
+    #loadingSubtitle{
+      margin: 0 0 18px;
+      color: var(--muted);
+      font-weight: 600;
+      letter-spacing: 0.02em;
+    }
+
+    #loadingHint{
+      margin: 14px 0 0;
+      color: var(--muted2);
+      font-size: 13px;
+      letter-spacing: 0.02em;
+    }
+
+    /* From Uiverse.io by Vosoone */
+    .main-container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100%;
+      width: 100%;
+    }
+
+    .loader {
+      width: 100%;
+      max-width: 560px; /* keeps it clean on desktop */
+    }
+
+    .trace-bg {
+      stroke: #333;
+      stroke-width: 1.8;
+      fill: none;
+    }
+
+    .trace-flow {
+      stroke-width: 1.8;
+      fill: none;
+      stroke-dasharray: 40 400;
+      stroke-dashoffset: 438;
+      filter: drop-shadow(0 0 6px currentColor);
+      animation: flow 3s cubic-bezier(0.5, 0, 0.9, 1) infinite;
+    }
+
+    .yellow { stroke: #ffea00; color: #ffea00; }
+    .blue   { stroke: #00ccff; color: #00ccff; }
+    .green  { stroke: #00ff15; color: #00ff15; }
+    .purple { stroke: #9900ff; color: #9900ff; }
+    .red    { stroke: #ff3300; color: #ff3300; }
+
+    @keyframes flow {
+      to { stroke-dashoffset: 0; }
+    }
+
+    /* =========================
+       App Layout
+    ========================== */
+    #app{ display: none; }
+
+    header{
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 18px;
+      padding: 20px 18px;
+    }
+
+    .brand{
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .brand h1{
+      margin: 0;
+      font-size: clamp(26px, 3.6vw, 40px);
+      font-weight: 900;
+      letter-spacing: 0.02em;
+    }
+
+    .brand p{
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.4;
+      max-width: 62ch;
+    }
+
+    .hero-card{
+      margin-top: 18px;
+      padding: 20px;
+      display: grid;
+      grid-template-columns: 1.2fr 0.8fr;
+      gap: 16px;
+    }
+
+    .hero-right{
+      border-radius: var(--radius);
+      border: 1px dashed rgba(255,255,255,0.20);
+      background: rgba(255,255,255,0.04);
+      display: grid;
+      place-items: center;
+      min-height: 160px;
+      color: var(--muted2);
+      text-align: center;
+      padding: 16px;
+    }
+
+    .hero-actions{
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 14px;
+    }
+
+    .divider{
+      height: 1px;
+      background: rgba(255,255,255,0.10);
+      margin: 26px 0;
+    }
+
+    .grid{
+      display: grid;
+      grid-template-columns: 1.25fr 0.75fr;
+      gap: 16px;
+    }
+
+    @media (max-width: 900px){
+      .hero-card{ grid-template-columns: 1fr; }
+      .grid{ grid-template-columns: 1fr; }
+    }
+
+    .map-box{
+      border-radius: 16px;
+      border: 1px dashed rgba(0,204,255,0.30);
+      background: rgba(0,204,255,0.06);
+      min-height: 260px;
+      display: grid;
+      place-items: center;
+      color: rgba(0,204,255,0.65);
+      text-align: center;
+      padding: 18px;
+    }
+
+    .coords{
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-top: 14px;
+    }
+
+    .coord{
+      padding: 12px 12px;
+      border-radius: 14px;
+      border: 1px solid var(--border);
+      background: rgba(255,255,255,0.04);
+    }
+
+    .coord .label{
+      font-size: 12px;
+      color: var(--muted2);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      margin-bottom: 6px;
+    }
+
+    .coord .value{
+      font-size: 18px;
+      font-weight: 800;
+    }
+
+    .stack{
+      display: grid;
+      gap: 16px;
+    }
+
+    .big-status{
+      font-size: 18px;
+      font-weight: 900;
+      letter-spacing: 0.01em;
+    }
+
+    .value-block{
+      font-size: 15px;
+      line-height: 1.45;
+      color: var(--text);
+      word-break: break-word;
+    }
+
+    .muted{
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.4;
+    }
+
+    details{
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      background: rgba(255,255,255,0.04);
+      overflow: hidden;
+    }
+    summary{
+      cursor: pointer;
+      padding: 14px 16px;
+      color: var(--muted);
+      font-weight: 700;
+      letter-spacing: 0.02em;
+      list-style: none;
+    }
+    summary::-webkit-details-marker{ display: none; }
+    .raw{
+      padding: 16px;
+      border-top: 1px solid var(--border);
+      white-space: pre-wrap;
+      word-break: break-word;
+      font-size: 12px;
+      color: rgba(255,255,255,0.80);
+    }
+
+    .topbar{
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 12px 18px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .net-status{
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      color: var(--muted);
+      font-weight: 700;
+      font-size: 13px;
+    }
+    .dot{
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.22);
+      box-shadow: 0 0 16px rgba(255,255,255,0.10);
+    }
+    .dot.ok{ background: rgba(0,255,21,0.80); box-shadow: 0 0 18px rgba(0,255,21,0.22); }
+    .dot.bad{ background: rgba(255,51,0,0.85); box-shadow: 0 0 18px rgba(255,51,0,0.22); }
+
+  </style>
+</head>
+
+<body>
+
+  <!-- =========================
+       Loading Screen (5 seconds)
+  ========================== -->
+  <div id="loadingScreen" aria-label="Loading screen">
+    <div id="loadingInner">
+      <h1 id="loadingTitle">ProxiCap+</h1>
+      <p id="loadingSubtitle">Smart Monitoring System</p>
+
+      <!-- From Uiverse.io by Vosoone -->
+      <div class="main-container">
+        <div class="loader">
+          <svg viewBox="0 0 800 500" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="ProxiCap+ loader animation">
+            <defs>
+              <linearGradient id="chipGradient" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#2d2d2d"></stop>
+                <stop offset="100%" stop-color="#0f0f0f"></stop>
+              </linearGradient>
+
+              <linearGradient id="textGradient" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#eeeeee"></stop>
+                <stop offset="100%" stop-color="#888888"></stop>
+              </linearGradient>
+
+              <linearGradient id="pinGradient" x1="1" y1="0" x2="0" y2="0">
+                <stop offset="0%" stop-color="#bbbbbb"></stop>
+                <stop offset="50%" stop-color="#888888"></stop>
+                <stop offset="100%" stop-color="#555555"></stop>
+              </linearGradient>
+            </defs>
+
+            <g id="traces">
+              <path d="M100 100 H200 V210 H326" class="trace-bg"></path>
+              <path d="M100 100 H200 V210 H326" class="trace-flow purple"></path>
+
+              <path d="M80 180 H180 V230 H326" class="trace-bg"></path>
+              <path d="M80 180 H180 V230 H326" class="trace-flow blue"></path>
+
+              <path d="M60 260 H150 V250 H326" class="trace-bg"></path>
+              <path d="M60 260 H150 V250 H326" class="trace-flow yellow"></path>
+
+              <path d="M100 350 H200 V270 H326" class="trace-bg"></path>
+              <path d="M100 350 H200 V270 H326" class="trace-flow green"></path>
+
+              <path d="M700 90 H560 V210 H474" class="trace-bg"></path>
+              <path d="M700 90 H560 V210 H474" class="trace-flow blue"></path>
+
+              <path d="M740 160 H580 V230 H474" class="trace-bg"></path>
+              <path d="M740 160 H580 V230 H474" class="trace-flow green"></path>
+
+              <path d="M720 250 H590 V250 H474" class="trace-bg"></path>
+              <path d="M720 250 H590 V250 H474" class="trace-flow red"></path>
+
+              <path d="M680 340 H570 V270 H474" class="trace-bg"></path>
+              <path d="M680 340 H570 V270 H474" class="trace-flow yellow"></path>
+            </g>
+
+            <rect
+              x="330"
+              y="190"
+              width="140"
+              height="100"
+              rx="20"
+              ry="20"
+              fill="url(#chipGradient)"
+              stroke="#222"
+              stroke-width="3"
+              filter="drop-shadow(0 0 6px rgba(0,0,0,0.8))"
+            ></rect>
+
+            <g>
+              <rect x="322" y="205" width="8" height="10" fill="url(#pinGradient)" rx="2"></rect>
+              <rect x="322" y="225" width="8" height="10" fill="url(#pinGradient)" rx="2"></rect>
+              <rect x="322" y="245" width="8" height="10" fill="url(#pinGradient)" rx="2"></rect>
+              <rect x="322" y="265" width="8" height="10" fill="url(#pinGradient)" rx="2"></rect>
+            </g>
+
+            <g>
+              <rect x="470" y="205" width="8" height="10" fill="url(#pinGradient)" rx="2"></rect>
+              <rect x="470" y="225" width="8" height="10" fill="url(#pinGradient)" rx="2"></rect>
+              <rect x="470" y="245" width="8" height="10" fill="url(#pinGradient)" rx="2"></rect>
+              <rect x="470" y="265" width="8" height="10" fill="url(#pinGradient)" rx="2"></rect>
+            </g>
+
+            <!-- Changed text inside chip -->
+            <text
+              x="400"
+              y="240"
+              font-family="Arial, sans-serif"
+              font-size="22"
+              fill="url(#textGradient)"
+              text-anchor="middle"
+              alignment-baseline="middle"
+            >
+              ProxiCap+
+            </text>
+
+            <circle cx="100" cy="100" r="5" fill="black"></circle>
+            <circle cx="80" cy="180" r="5" fill="black"></circle>
+            <circle cx="60" cy="260" r="5" fill="black"></circle>
+            <circle cx="100" cy="350" r="5" fill="black"></circle>
+
+            <circle cx="700" cy="90" r="5" fill="black"></circle>
+            <circle cx="740" cy="160" r="5" fill="black"></circle>
+            <circle cx="720" cy="250" r="5" fill="black"></circle>
+            <circle cx="680" cy="340" r="5" fill="black"></circle>
+          </svg>
+        </div>
+      </div>
+
+      <p id="loadingHint">Initializing dashboard…</p>
+    </div>
+  </div>
+
+  <!-- =========================
+       Main App
+  ========================== -->
+  <div id="app">
+    <div class="container">
+
+      <div class="card">
+        <div class="topbar">
+          <div class="net-status">
+            <span id="netDot" class="dot"></span>
+            <span id="netText">Connecting…</span>
+          </div>
+          <span class="pill neutral mono" id="localUpdated">Last updated: —</span>
+        </div>
+
+        <!-- Landing / Hero -->
+        <header>
+          <div class="brand">
+            <h1>ProxiCap+</h1>
+            <p>
+              Live geolocation and fall-status dashboard. This page polls the latest device JSON and displays
+              caregiver-focused info in a clean interface.
+            </p>
+
+            <div class="hero-actions">
+              <a class="btn" href="#dashboard">View Live Dashboard</a>
+              <a class="btn" href="#rawdata" style="border-color: rgba(255,255,255,0.22); background: rgba(255,255,255,0.06); box-shadow:none;">
+                View Raw Data
+              </a>
+            </div>
+          </div>
+
+          <div class="hero-right">
+            <div>
+              <div class="mono" style="font-weight:900; color: rgba(0,204,255,0.80);">Device Preview</div>
+              <div class="muted" style="margin-top:8px;">(placeholder)</div>
+            </div>
+          </div>
+        </header>
+
+        <div class="divider"></div>
+
+        <!-- Dashboard -->
+        <div id="dashboard" class="container" style="padding-top: 0;">
+          <div class="grid">
+
+            <!-- Left: Geolocation -->
+            <div class="card">
+              <div class="card-header">
+                <div class="card-title">Geolocation</div>
+                <span class="pill neutral mono">GPS</span>
+              </div>
+              <div class="card-body">
+                <div class="map-box">
+                  <div>
+                    <div style="font-weight: 900; letter-spacing: 0.02em;">Map Preview</div>
+                    <div class="muted">(placeholder)</div>
+                  </div>
+                </div>
+
+                <div class="coords">
+                  <div class="coord">
+                    <div class="label">Latitude</div>
+                    <div class="value mono" id="latVal">—</div>
+                  </div>
+                  <div class="coord">
+                    <div class="label">Longitude</div>
+                    <div class="value mono" id="lonVal">—</div>
+                  </div>
+                </div>
+
+                <div class="muted" style="margin-top: 12px;">
+                  Coordinates are read from device JSON keys: <span class="mono">lat</span> and <span class="mono">lon</span>.
+                </div>
+              </div>
+            </div>
+
+            <!-- Right: Status / Address / Time -->
+            <div class="stack">
+
+              <div class="card">
+                <div class="card-header">
+                  <div class="card-title">Status</div>
+                  <span id="statusPill" class="pill neutral">
+                    <span>●</span> <span id="statusShort">Waiting…</span>
+                  </span>
+                </div>
+                <div class="card-body">
+                  <div class="big-status" id="statusText">Waiting for status…</div>
+                  <div class="muted" style="margin-top: 8px;">
+                    Pulled directly from device JSON key: <span class="mono">status</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="card">
+                <div class="card-header">
+                  <div class="card-title">Address</div>
+                  <span class="pill neutral mono">TXT</span>
+                </div>
+                <div class="card-body">
+                  <div class="value-block" id="addressText">Waiting for address…</div>
+                  <div class="muted" style="margin-top: 8px;">
+                    Displayed exactly as received (rough strings are OK).
+                  </div>
+                </div>
+              </div>
+
+              <div class="card">
+                <div class="card-header">
+                  <div class="card-title">Time</div>
+                  <span class="pill neutral mono">RTC</span>
+                </div>
+                <div class="card-body">
+                  <div class="value-block mono" id="timeText">Waiting for time…</div>
+                  <div class="muted" style="margin-top: 8px;">
+                    Pulled directly from device JSON key: <span class="mono">time</span>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+          </div>
+
+          <div style="margin-top: 18px;">
+            <details id="rawdata">
+              <summary>Raw JSON (debug)</summary>
+              <div class="raw mono" id="rawJson">Waiting for data…</div>
+            </details>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // =========================
+    // Config
+    // =========================
+    const ENDPOINT = "https://funny-kelpie-034c79.netlify.app/.netlify/functions/update";
+    const POLL_MS = 3000;
+    const LOADING_MS = 5000;
+
+    // =========================
+    // Elements
+    // =========================
+    const netDot = document.getElementById("netDot");
+    const netText = document.getElementById("netText");
+    const localUpdated = document.getElementById("localUpdated");
+
+    const latVal = document.getElementById("latVal");
+    const lonVal = document.getElementById("lonVal");
+    const statusText = document.getElementById("statusText");
+    const statusShort = document.getElementById("statusShort");
+    const statusPill = document.getElementById("statusPill");
+    const addressText = document.getElementById("addressText");
+    const timeText = document.getElementById("timeText");
+    const rawJson = document.getElementById("rawJson");
+
+    // =========================
+    // Helpers
+    // =========================
+    function setNet(state, message){
+      // state: "ok" | "bad" | "neutral"
+      netDot.classList.remove("ok", "bad");
+      if(state === "ok") netDot.classList.add("ok");
+      if(state === "bad") netDot.classList.add("bad");
+      netText.textContent = message;
+    }
+
+    function looksLikeFall(statusStr){
+      const s = String(statusStr || "").toLowerCase();
+      return s.includes("fall") || s.includes("detected") || s.includes("alert") || s.includes("emergency");
+    }
+
+    function setStatusUI(statusStr){
+      const fall = looksLikeFall(statusStr);
+      statusPill.classList.remove("ok", "bad", "neutral");
+      if (!statusStr || statusStr === "Waiting…") {
+        statusPill.classList.add("neutral");
+        statusShort.textContent = "Waiting…";
+        statusText.textContent = "Waiting for status…";
+        return;
+      }
+
+      if (fall){
+        statusPill.classList.add("bad");
+        statusShort.textContent = "FALL";
+        statusText.textContent = String(statusStr);
+      } else {
+        statusPill.classList.add("ok");
+        statusShort.textContent = "OK";
+        statusText.textContent = String(statusStr);
+      }
+    }
+
+    function setLastUpdatedNow(){
+      const t = new Date().toLocaleString();
+      localUpdated.textContent = "Last updated: " + t;
+    }
+
+    function setPlaceholdersWaiting(){
+      latVal.textContent = "—";
+      lonVal.textContent = "—";
+      addressText.textContent = "Waiting for address…";
+      timeText.textContent = "Waiting for time…";
+      rawJson.textContent = "Waiting for data…";
+      setStatusUI("Waiting…");
+    }
+
+    // =========================
+    // Fetch logic (same idea as your current page)
+    // =========================
+    async function fetchData(){
+      try{
+        const res = await fetch(ENDPOINT);
+        const data = await res.json();
+
+        if (!data || Object.keys(data).length === 0){
+          setNet("bad", "No data yet");
+          setPlaceholdersWaiting();
+          return;
+        }
+
+        // Network status
+        setNet("ok", "Online");
+
+        // Populate UI from JSON keys
+        latVal.textContent = (data.lat ?? "—");
+        lonVal.textContent = (data.lon ?? "—");
+        addressText.textContent = (data.address ?? "—");
+        timeText.textContent = (data.time ?? "—");
+        setStatusUI(data.status ?? "—");
+
+        // Raw JSON (optional debug)
+        rawJson.textContent = JSON.stringify(data, null, 2);
+
+        // Local "last updated" time (webpage clock)
+        setLastUpdatedNow();
+
+      } catch(err){
+        setNet("bad", "Error fetching data");
+        rawJson.textContent = "Error fetching data";
+      }
+    }
+
+    // Start polling immediately (even while loading screen is up)
+    setInterval(fetchData, POLL_MS);
+    fetchData();
+
+    // =========================
+    // Artificial 5-second loading screen -> smooth fade
+    // =========================
+    setTimeout(() => {
+      const loading = document.getElementById("loadingScreen");
+      const app = document.getElementById("app");
+
+      app.style.display = "block";
+      loading.style.opacity = "0";
+
+      setTimeout(() => {
+        loading.remove();
+      }, 550);
+    }, LOADING_MS);
+  </script>
 </body>
 </html>
