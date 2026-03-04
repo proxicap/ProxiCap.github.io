@@ -5,6 +5,16 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>ProxiCap+ Dashboard</title>
 
+  <!-- Leaflet (Map) -->
+  <link
+    rel="stylesheet"
+    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+  />
+  <script
+    src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+    defer
+  ></script>
+
   <style>
     /* =========================
        Global (Dark Tech Style)
@@ -178,7 +188,7 @@
 
     .loader {
       width: 100%;
-      max-width: 560px; /* keeps it clean on desktop */
+      max-width: 560px;
     }
 
     .trace-bg {
@@ -239,14 +249,6 @@
       max-width: 62ch;
     }
 
-    .hero-card{
-      margin-top: 18px;
-      padding: 20px;
-      display: grid;
-      grid-template-columns: 1.2fr 0.8fr;
-      gap: 16px;
-    }
-
     .hero-right{
       border-radius: var(--radius);
       border: 1px dashed rgba(255,255,255,0.20);
@@ -279,7 +281,6 @@
     }
 
     @media (max-width: 900px){
-      .hero-card{ grid-template-columns: 1fr; }
       .grid{ grid-template-columns: 1fr; }
     }
 
@@ -288,11 +289,24 @@
       border: 1px dashed rgba(0,204,255,0.30);
       background: rgba(0,204,255,0.06);
       min-height: 260px;
-      display: grid;
-      place-items: center;
-      color: rgba(0,204,255,0.65);
-      text-align: center;
-      padding: 18px;
+      display: block;
+      overflow: hidden; /* needed so map corners match card */
+    }
+
+    /* Leaflet map needs explicit height */
+    #map{
+      width: 100%;
+      min-height: 260px;
+    }
+
+    /* Optional: dark-ish zoom buttons */
+    .leaflet-control-zoom a{
+      background: rgba(15,17,23,0.85);
+      color: rgba(255,255,255,0.9);
+      border: 1px solid rgba(255,255,255,0.12);
+    }
+    .leaflet-control-zoom a:hover{
+      background: rgba(15,17,23,0.95);
     }
 
     .coords{
@@ -396,7 +410,6 @@
     }
     .dot.ok{ background: rgba(0,255,21,0.80); box-shadow: 0 0 18px rgba(0,255,21,0.22); }
     .dot.bad{ background: rgba(255,51,0,0.85); box-shadow: 0 0 18px rgba(255,51,0,0.22); }
-
   </style>
 </head>
 
@@ -410,7 +423,6 @@
       <h1 id="loadingTitle">ProxiCap+</h1>
       <p id="loadingSubtitle">Smart Monitoring System</p>
 
-      <!-- From Uiverse.io by Vosoone -->
       <div class="main-container">
         <div class="loader">
           <svg viewBox="0 0 800 500" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="ProxiCap+ loader animation">
@@ -485,7 +497,6 @@
               <rect x="470" y="265" width="8" height="10" fill="url(#pinGradient)" rx="2"></rect>
             </g>
 
-            <!-- Changed text inside chip -->
             <text
               x="400"
               y="240"
@@ -530,7 +541,6 @@
           <span class="pill neutral mono" id="localUpdated">Last updated: —</span>
         </div>
 
-        <!-- Landing / Hero -->
         <header>
           <div class="brand">
             <h1>ProxiCap+</h1>
@@ -557,7 +567,6 @@
 
         <div class="divider"></div>
 
-        <!-- Dashboard -->
         <div id="dashboard" class="container" style="padding-top: 0;">
           <div class="grid">
 
@@ -565,14 +574,12 @@
             <div class="card">
               <div class="card-header">
                 <div class="card-title">Geolocation</div>
-                <span class="pill neutral mono">GPS</span>
+                <span class="pill neutral mono">MAP</span>
               </div>
               <div class="card-body">
+                <!-- REAL MAP -->
                 <div class="map-box">
-                  <div>
-                    <div style="font-weight: 900; letter-spacing: 0.02em;">Map Preview</div>
-                    <div class="muted">(placeholder)</div>
-                  </div>
+                  <div id="map" aria-label="Map"></div>
                 </div>
 
                 <div class="coords">
@@ -587,7 +594,7 @@
                 </div>
 
                 <div class="muted" style="margin-top: 12px;">
-                  Coordinates are read from device JSON keys: <span class="mono">lat</span> and <span class="mono">lon</span>.
+                  Map updates from JSON keys: <span class="mono">lat</span> and <span class="mono">lon</span>.
                 </div>
               </div>
             </div>
@@ -605,7 +612,7 @@
                 <div class="card-body">
                   <div class="big-status" id="statusText">Waiting for status…</div>
                   <div class="muted" style="margin-top: 8px;">
-                    Pulled directly from device JSON key: <span class="mono">status</span>
+                    From JSON key: <span class="mono">status</span>
                   </div>
                 </div>
               </div>
@@ -618,7 +625,7 @@
                 <div class="card-body">
                   <div class="value-block" id="addressText">Waiting for address…</div>
                   <div class="muted" style="margin-top: 8px;">
-                    Displayed exactly as received (rough strings are OK).
+                    Displayed exactly as received.
                   </div>
                 </div>
               </div>
@@ -631,7 +638,7 @@
                 <div class="card-body">
                   <div class="value-block mono" id="timeText">Waiting for time…</div>
                   <div class="muted" style="margin-top: 8px;">
-                    Pulled directly from device JSON key: <span class="mono">time</span>
+                    From JSON key: <span class="mono">time</span>
                   </div>
                 </div>
               </div>
@@ -676,10 +683,49 @@
     const rawJson = document.getElementById("rawJson");
 
     // =========================
+    // Map (Leaflet)
+    // =========================
+    let map = null;
+    let marker = null;
+
+    function initMap() {
+      // Default center (before real data arrives)
+      const defaultLat = 53.5444;
+      const defaultLon = -113.4909;
+
+      map = L.map("map", {
+        zoomControl: true,
+        attributionControl: true
+      }).setView([defaultLat, defaultLon], 13);
+
+      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+        maxZoom: 19,
+        attribution: '&copy; OpenStreetMap contributors'
+      }).addTo(map);
+
+      marker = L.marker([defaultLat, defaultLon]).addTo(map);
+      marker.bindPopup("ProxiCap+ location").openPopup();
+    }
+
+    function updateMap(lat, lon, popupText) {
+      if (!map || !marker) return;
+
+      const latNum = Number(lat);
+      const lonNum = Number(lon);
+
+      // Only update if valid numbers
+      if (!Number.isFinite(latNum) || !Number.isFinite(lonNum)) return;
+
+      const newPos = [latNum, lonNum];
+      marker.setLatLng(newPos);
+      if (popupText) marker.setPopupContent(popupText);
+      map.setView(newPos, map.getZoom(), { animate: true });
+    }
+
+    // =========================
     // Helpers
     // =========================
     function setNet(state, message){
-      // state: "ok" | "bad" | "neutral"
       netDot.classList.remove("ok", "bad");
       if(state === "ok") netDot.classList.add("ok");
       if(state === "bad") netDot.classList.add("bad");
@@ -694,6 +740,7 @@
     function setStatusUI(statusStr){
       const fall = looksLikeFall(statusStr);
       statusPill.classList.remove("ok", "bad", "neutral");
+
       if (!statusStr || statusStr === "Waiting…") {
         statusPill.classList.add("neutral");
         statusShort.textContent = "Waiting…";
@@ -740,21 +787,20 @@
           return;
         }
 
-        // Network status
         setNet("ok", "Online");
 
-        // Populate UI from JSON keys
         latVal.textContent = (data.lat ?? "—");
         lonVal.textContent = (data.lon ?? "—");
         addressText.textContent = (data.address ?? "—");
         timeText.textContent = (data.time ?? "—");
         setStatusUI(data.status ?? "—");
 
-        // Raw JSON (optional debug)
         rawJson.textContent = JSON.stringify(data, null, 2);
-
-        // Local "last updated" time (webpage clock)
         setLastUpdatedNow();
+
+        // Update map marker + center
+        const popup = `ProxiCap+<br>${data.address ?? ""}<br>${data.time ?? ""}<br>(${data.lat ?? "—"}, ${data.lon ?? "—"})`;
+        updateMap(data.lat, data.lon, popup);
 
       } catch(err){
         setNet("bad", "Error fetching data");
@@ -765,6 +811,11 @@
     // Start polling immediately (even while loading screen is up)
     setInterval(fetchData, POLL_MS);
     fetchData();
+
+    // Init map when Leaflet is ready
+    window.addEventListener("load", () => {
+      if (window.L) initMap();
+    });
 
     // =========================
     // Artificial 5-second loading screen -> smooth fade
@@ -778,6 +829,9 @@
 
       setTimeout(() => {
         loading.remove();
+
+        // Leaflet sometimes needs a resize after being revealed
+        if (map) map.invalidateSize();
       }, 550);
     }, LOADING_MS);
   </script>
