@@ -16,9 +16,6 @@
   ></script>
 
   <style>
-    /* =========================
-       Global (Dark Tech Style)
-    ========================== */
     :root{
       --bg: #0f1117;
       --panel: rgba(255,255,255,0.06);
@@ -110,34 +107,10 @@
       box-shadow: 0 0 18px rgba(0,204,255,0.10);
     }
 
-    .btn{
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      gap: 10px;
-      padding: 12px 16px;
-      border-radius: 14px;
-      border: 1px solid rgba(0,204,255,0.35);
-      background: rgba(0,204,255,0.10);
-      color: var(--text);
-      font-weight: 700;
-      cursor: pointer;
-      transition: transform 160ms ease, background 160ms ease, border-color 160ms ease;
-      box-shadow: 0 0 18px rgba(0,204,255,0.10);
-    }
-    .btn:hover{
-      transform: translateY(-1px);
-      background: rgba(0,204,255,0.14);
-      border-color: rgba(0,204,255,0.55);
-    }
-
     .mono{
       font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
     }
 
-    /* =========================
-       Loading Overlay (Uiverse)
-    ========================== */
     #loadingScreen{
       position: fixed;
       inset: 0;
@@ -177,7 +150,6 @@
       letter-spacing: 0.02em;
     }
 
-    /* From Uiverse.io by Vosoone */
     .main-container {
       display: flex;
       justify-content: center;
@@ -216,9 +188,6 @@
       to { stroke-dashoffset: 0; }
     }
 
-    /* =========================
-       App Layout
-    ========================== */
     #app{ display: none; }
 
     header{
@@ -261,13 +230,6 @@
       padding: 16px;
     }
 
-    .hero-actions{
-      display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
-      margin-top: 14px;
-    }
-
     .divider{
       height: 1px;
       background: rgba(255,255,255,0.10);
@@ -290,16 +252,14 @@
       background: rgba(0,204,255,0.06);
       min-height: 260px;
       display: block;
-      overflow: hidden; /* needed so map corners match card */
+      overflow: hidden;
     }
 
-    /* Leaflet map needs explicit height */
     #map{
       width: 100%;
       min-height: 260px;
     }
 
-    /* Optional: dark-ish zoom buttons */
     .leaflet-control-zoom a{
       background: rgba(15,17,23,0.85);
       color: rgba(255,255,255,0.9);
@@ -415,9 +375,6 @@
 
 <body>
 
-  <!-- =========================
-       Loading Screen (5 seconds)
-  ========================== -->
   <div id="loadingScreen" aria-label="Loading screen">
     <div id="loadingInner">
       <h1 id="loadingTitle">ProxiCap+</h1>
@@ -526,9 +483,6 @@
     </div>
   </div>
 
-  <!-- =========================
-       Main App
-  ========================== -->
   <div id="app">
     <div class="container">
 
@@ -548,13 +502,6 @@
               Live geolocation and fall-status dashboard. This page polls the latest device JSON and displays
               caregiver-focused info in a clean interface.
             </p>
-
-            <div class="hero-actions">
-              <a class="btn" href="#dashboard">View Live Dashboard</a>
-              <a class="btn" href="#rawdata" style="border-color: rgba(255,255,255,0.22); background: rgba(255,255,255,0.06); box-shadow:none;">
-                View Raw Data
-              </a>
-            </div>
           </div>
 
           <div class="hero-right">
@@ -570,14 +517,12 @@
         <div id="dashboard" class="container" style="padding-top: 0;">
           <div class="grid">
 
-            <!-- Left: Geolocation -->
             <div class="card">
               <div class="card-header">
                 <div class="card-title">Geolocation</div>
                 <span class="pill neutral mono">MAP</span>
               </div>
               <div class="card-body">
-                <!-- REAL MAP -->
                 <div class="map-box">
                   <div id="map" aria-label="Map"></div>
                 </div>
@@ -592,14 +537,9 @@
                     <div class="value mono" id="lonVal">—</div>
                   </div>
                 </div>
-
-                <div class="muted" style="margin-top: 12px;">
-                  Map updates from JSON keys: <span class="mono">lat</span> and <span class="mono">lon</span>.
-                </div>
               </div>
             </div>
 
-            <!-- Right: Status / Address / Time -->
             <div class="stack">
 
               <div class="card">
@@ -611,9 +551,6 @@
                 </div>
                 <div class="card-body">
                   <div class="big-status" id="statusText">Waiting for status…</div>
-                  <div class="muted" style="margin-top: 8px;">
-                    From JSON key: <span class="mono">status</span>
-                  </div>
                 </div>
               </div>
 
@@ -624,9 +561,6 @@
                 </div>
                 <div class="card-body">
                   <div class="value-block" id="addressText">Waiting for address…</div>
-                  <div class="muted" style="margin-top: 8px;">
-                    Displayed exactly as received.
-                  </div>
                 </div>
               </div>
 
@@ -637,9 +571,6 @@
                 </div>
                 <div class="card-body">
                   <div class="value-block mono" id="timeText">Waiting for time…</div>
-                  <div class="muted" style="margin-top: 8px;">
-                    From JSON key: <span class="mono">time</span>
-                  </div>
                 </div>
               </div>
 
@@ -659,16 +590,10 @@
   </div>
 
   <script>
-    // =========================
-    // Config
-    // =========================
     const ENDPOINT = "https://funny-kelpie-034c79.netlify.app/.netlify/functions/update";
     const POLL_MS = 3000;
     const LOADING_MS = 5000;
 
-    // =========================
-    // Elements
-    // =========================
     const netDot = document.getElementById("netDot");
     const netText = document.getElementById("netText");
     const localUpdated = document.getElementById("localUpdated");
@@ -682,14 +607,10 @@
     const timeText = document.getElementById("timeText");
     const rawJson = document.getElementById("rawJson");
 
-    // =========================
-    // Map (Leaflet)
-    // =========================
     let map = null;
     let marker = null;
 
     function initMap() {
-      // Default center (before real data arrives)
       const defaultLat = 53.5444;
       const defaultLon = -113.4909;
 
@@ -713,7 +634,6 @@
       const latNum = Number(lat);
       const lonNum = Number(lon);
 
-      // Only update if valid numbers
       if (!Number.isFinite(latNum) || !Number.isFinite(lonNum)) return;
 
       const newPos = [latNum, lonNum];
@@ -722,9 +642,6 @@
       map.setView(newPos, map.getZoom(), { animate: true });
     }
 
-    // =========================
-    // Helpers
-    // =========================
     function setNet(state, message){
       netDot.classList.remove("ok", "bad");
       if(state === "ok") netDot.classList.add("ok");
@@ -773,9 +690,6 @@
       setStatusUI("Waiting…");
     }
 
-    // =========================
-    // Fetch logic (same idea as your current page)
-    // =========================
     async function fetchData(){
       try{
         const res = await fetch(ENDPOINT);
@@ -798,7 +712,6 @@
         rawJson.textContent = JSON.stringify(data, null, 2);
         setLastUpdatedNow();
 
-        // Update map marker + center
         const popup = `ProxiCap+<br>${data.address ?? ""}<br>${data.time ?? ""}<br>(${data.lat ?? "—"}, ${data.lon ?? "—"})`;
         updateMap(data.lat, data.lon, popup);
 
@@ -808,18 +721,13 @@
       }
     }
 
-    // Start polling immediately (even while loading screen is up)
     setInterval(fetchData, POLL_MS);
     fetchData();
 
-    // Init map when Leaflet is ready
     window.addEventListener("load", () => {
       if (window.L) initMap();
     });
 
-    // =========================
-    // Artificial 5-second loading screen -> smooth fade
-    // =========================
     setTimeout(() => {
       const loading = document.getElementById("loadingScreen");
       const app = document.getElementById("app");
@@ -829,8 +737,6 @@
 
       setTimeout(() => {
         loading.remove();
-
-        // Leaflet sometimes needs a resize after being revealed
         if (map) map.invalidateSize();
       }, 550);
     }, LOADING_MS);
