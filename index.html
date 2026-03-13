@@ -191,43 +191,33 @@
     #app{ display: none; }
 
     header{
-      display: flex;
-      align-items: flex-start;
-      justify-content: space-between;
-      gap: 18px;
-      padding: 20px 18px;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      justify-content:center;
+      padding:40px 18px;
+      text-align:center;
     }
 
     .brand{
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      gap:12px;
     }
 
     .brand h1{
-      margin: 0;
-      font-size: clamp(26px, 3.6vw, 40px);
-      font-weight: 900;
-      letter-spacing: 0.02em;
+      margin:0;
+      font-size:clamp(48px,6vw,72px);
+      font-weight:900;
+      letter-spacing:0.02em;
     }
 
     .brand p{
-      margin: 0;
-      color: var(--muted);
-      line-height: 1.4;
-      max-width: 62ch;
-    }
-
-    .hero-right{
-      border-radius: var(--radius);
-      border: 1px dashed rgba(255,255,255,0.20);
-      background: rgba(255,255,255,0.04);
-      display: grid;
-      place-items: center;
-      min-height: 160px;
-      color: var(--muted2);
-      text-align: center;
-      padding: 16px;
+      margin:0;
+      font-size:clamp(20px,2.5vw,30px);
+      color:var(--muted);
+      line-height:1.4;
     }
 
     .divider{
@@ -497,17 +487,8 @@
 
         <header>
           <div class="brand">
-            <h1 style="text-align: center;">            ProxiCap+</h1>
-            <p style="text-align: center;">
-             Live Caretaker Monitoring Page
-            </p>
-          </div>
-
-          <div class="hero-right">
-            <div>
-              <div class="mono" style="font-weight:900; color: rgba(0,204,255,0.80);">Device Preview</div>
-              <div class="muted" style="margin-top:8px;">(placeholder)</div>
-            </div>
+            <h1>ProxiCap+</h1>
+            <p>Live Caretaker Monitoring Page</p>
           </div>
         </header>
 
