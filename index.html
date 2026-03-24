@@ -1,181 +1,725 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>ProxiCap+ Dashboard</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ProxiCap+ Dashboard</title>
 
-<!-- Leaflet (Map) -->
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" defer></script>
+  <!-- Leaflet (Map) -->
+  <link
+    rel="stylesheet"
+    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+  />
+  <script
+    src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+    defer
+  ></script>
 
-<style>
-:root{
-  --bg:#0f1117;
-  --panel:rgba(255,255,255,0.06);
-  --panel-2:rgba(255,255,255,0.08);
-  --border:rgba(255,255,255,0.10);
-  --text:rgba(255,255,255,0.92);
-  --muted:rgba(255,255,255,0.65);
-  --muted2:rgba(255,255,255,0.45);
-  --ok:#00ff15;
-  --warn:#ffea00;
-  --bad:#ff3300;
-  --accent:#00ccff;
-  --shadow:0 12px 30px rgba(0,0,0,0.40);
-  --radius:18px;
-}
+  <style>
+    :root{
+      --bg: #0f1117;
+      --panel: rgba(255,255,255,0.06);
+      --panel-2: rgba(255,255,255,0.08);
+      --border: rgba(255,255,255,0.10);
+      --text: rgba(255,255,255,0.92);
+      --muted: rgba(255,255,255,0.65);
+      --muted2: rgba(255,255,255,0.45);
 
-*{box-sizing:border-box;}
-html,body{height:100%;}
+      --ok: #00ff15;
+      --warn: #ffea00;
+      --bad: #ff3300;
+      --accent: #00ccff;
 
-body{
-  margin:0;
-  font-family:ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-  background:
-    radial-gradient(1200px 700px at 20% 10%, rgba(0,204,255,0.14), transparent 55%),
-    radial-gradient(900px 600px at 80% 20%, rgba(0,255,21,0.10), transparent 60%),
-    var(--bg);
-  color:var(--text);
-}
+      --shadow: 0 12px 30px rgba(0,0,0,0.40);
+      --radius: 18px;
+    }
 
-.container{
-  width:min(1100px,92vw);
-  margin:0 auto;
-  padding:28px 0 60px;
-}
+    * { box-sizing: border-box; }
+    html, body { height: 100%; }
+    body{
+      margin: 0;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      background: radial-gradient(1200px 700px at 20% 10%, rgba(0,204,255,0.14), transparent 55%),
+                  radial-gradient(900px 600px at 80% 20%, rgba(0,255,21,0.10), transparent 60%),
+                  var(--bg);
+      color: var(--text);
+    }
 
-.card{
-  background:var(--panel);
-  border:1px solid var(--border);
-  border-radius:var(--radius);
-  box-shadow:var(--shadow);
-  overflow:hidden;
-  backdrop-filter:blur(10px);
-}
+    a { color: inherit; text-decoration: none; }
+    .container{
+      width: min(1100px, 92vw);
+      margin: 0 auto;
+      padding: 28px 0 60px;
+    }
 
-/* --- rest of your CSS remains EXACT, just formatted --- */
-</style>
+    .card{
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+      backdrop-filter: blur(10px);
+    }
+
+    .card-header{
+      padding: 16px 18px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .card-title{
+      font-size: 14px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    .card-body{
+      padding: 18px;
+    }
+
+    .pill{
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: rgba(255,255,255,0.04);
+      font-weight: 700;
+      letter-spacing: 0.02em;
+      user-select: none;
+    }
+
+    .pill.ok{
+      border-color: rgba(0,255,21,0.35);
+      box-shadow: 0 0 18px rgba(0,255,21,0.12);
+    }
+    .pill.bad{
+      border-color: rgba(255,51,0,0.35);
+      box-shadow: 0 0 18px rgba(255,51,0,0.12);
+    }
+    .pill.neutral{
+      border-color: rgba(0,204,255,0.25);
+      box-shadow: 0 0 18px rgba(0,204,255,0.10);
+    }
+
+    .mono{
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    }
+
+    #loadingScreen{
+      position: fixed;
+      inset: 0;
+      z-index: 9999;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--bg);
+      transition: opacity 500ms ease;
+    }
+
+    #loadingInner{
+      width: min(820px, 92vw);
+      text-align: center;
+      padding: 22px 14px;
+    }
+
+    #loadingTitle{
+      font-size: clamp(26px, 4vw, 44px);
+      font-weight: 900;
+      letter-spacing: 0.02em;
+      margin: 0 0 6px;
+      text-shadow: 0 0 18px rgba(0,204,255,0.20);
+    }
+
+    #loadingSubtitle{
+      margin: 0 0 18px;
+      color: var(--muted);
+      font-weight: 600;
+      letter-spacing: 0.02em;
+    }
+
+    #loadingHint{
+      margin: 14px 0 0;
+      color: var(--muted2);
+      font-size: 13px;
+      letter-spacing: 0.02em;
+    }
+
+    .main-container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100%;
+      width: 100%;
+    }
+
+    .loader {
+      width: 100%;
+      max-width: 560px;
+    }
+
+    .trace-bg {
+      stroke: #333;
+      stroke-width: 1.8;
+      fill: none;
+    }
+
+    .trace-flow {
+      stroke-width: 1.8;
+      fill: none;
+      stroke-dasharray: 40 400;
+      stroke-dashoffset: 438;
+      filter: drop-shadow(0 0 6px currentColor);
+      animation: flow 3s cubic-bezier(0.5, 0, 0.9, 1) infinite;
+    }
+
+    .yellow { stroke: #ffea00; color: #ffea00; }
+    .blue   { stroke: #00ccff; color: #00ccff; }
+    .green  { stroke: #00ff15; color: #00ff15; }
+    .purple { stroke: #9900ff; color: #9900ff; }
+    .red    { stroke: #ff3300; color: #ff3300; }
+
+    @keyframes flow {
+      to { stroke-dashoffset: 0; }
+    }
+
+    #app{ display: none; }
+
+    header{
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      justify-content:center;
+      padding:40px 18px;
+      text-align:center;
+    }
+
+    .brand{
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      gap:12px;
+    }
+
+    .brand h1{
+      margin:0;
+      font-size:clamp(48px,6vw,72px);
+      font-weight:900;
+      letter-spacing:0.02em;
+    }
+
+    .brand p{
+      margin:0;
+      font-size:clamp(20px,2.5vw,30px);
+      color:var(--muted);
+      line-height:1.4;
+    }
+
+    .divider{
+      height: 1px;
+      background: rgba(255,255,255,0.10);
+      margin: 26px 0;
+    }
+
+    .grid{
+      display: grid;
+      grid-template-columns: 1.25fr 0.75fr;
+      gap: 16px;
+    }
+
+    @media (max-width: 900px){
+      .grid{ grid-template-columns: 1fr; }
+    }
+
+    .map-box{
+      border-radius: 16px;
+      border: 1px dashed rgba(0,204,255,0.30);
+      background: rgba(0,204,255,0.06);
+      min-height: 260px;
+      display: block;
+      overflow: hidden;
+    }
+
+    #map{
+      width: 100%;
+      min-height: 260px;
+    }
+
+    .leaflet-control-zoom a{
+      background: rgba(15,17,23,0.85);
+      color: rgba(255,255,255,0.9);
+      border: 1px solid rgba(255,255,255,0.12);
+    }
+    .leaflet-control-zoom a:hover{
+      background: rgba(15,17,23,0.95);
+    }
+
+    .coords{
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-top: 14px;
+    }
+
+    .coord{
+      padding: 12px 12px;
+      border-radius: 14px;
+      border: 1px solid var(--border);
+      background: rgba(255,255,255,0.04);
+    }
+
+    .coord .label{
+      font-size: 12px;
+      color: var(--muted2);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      margin-bottom: 6px;
+    }
+
+    .coord .value{
+      font-size: 18px;
+      font-weight: 800;
+    }
+
+    .stack{
+      display: grid;
+      gap: 16px;
+    }
+
+    .big-status{
+      font-size: 18px;
+      font-weight: 900;
+      letter-spacing: 0.01em;
+    }
+
+    .value-block{
+      font-size: 15px;
+      line-height: 1.45;
+      color: var(--text);
+      word-break: break-word;
+    }
+
+    .muted{
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.4;
+    }
+
+    details{
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      background: rgba(255,255,255,0.04);
+      overflow: hidden;
+    }
+    summary{
+      cursor: pointer;
+      padding: 14px 16px;
+      color: var(--muted);
+      font-weight: 700;
+      letter-spacing: 0.02em;
+      list-style: none;
+    }
+    summary::-webkit-details-marker{ display: none; }
+    .raw{
+      padding: 16px;
+      border-top: 1px solid var(--border);
+      white-space: pre-wrap;
+      word-break: break-word;
+      font-size: 12px;
+      color: rgba(255,255,255,0.80);
+    }
+
+    .topbar{
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 12px 18px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .net-status{
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      color: var(--muted);
+      font-weight: 700;
+      font-size: 13px;
+    }
+    .dot{
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.22);
+      box-shadow: 0 0 16px rgba(255,255,255,0.10);
+    }
+    .dot.ok{ background: rgba(0,255,21,0.80); box-shadow: 0 0 18px rgba(0,255,21,0.22); }
+    .dot.bad{ background: rgba(255,51,0,0.85); box-shadow: 0 0 18px rgba(255,51,0,0.22); }
+  </style>
 </head>
 
 <body>
 
-<!-- LOADING SCREEN -->
-<div id="loadingScreen">
-  <div id="loadingInner">
-    <h1 id="loadingTitle">ProxiCap+</h1>
-    <p id="loadingSubtitle">Smart Monitoring System</p>
-    <p id="loadingHint">Initializing dashboard…</p>
-  </div>
-</div>
+  <div id="loadingScreen" aria-label="Loading screen">
+    <div id="loadingInner">
+      <h1 id="loadingTitle">ProxiCap+</h1>
+      <p id="loadingSubtitle">Smart Monitoring System</p>
 
-<!-- MAIN APP -->
-<div id="app">
-  <div class="container">
+      <div class="main-container">
+        <div class="loader">
+          <svg viewBox="0 0 800 500" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="ProxiCap+ loader animation">
+            <defs>
+              <linearGradient id="chipGradient" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#2d2d2d"></stop>
+                <stop offset="100%" stop-color="#0f0f0f"></stop>
+              </linearGradient>
 
-    <div class="card">
-      <div class="topbar">
-        <div class="net-status">
-          <span id="netDot" class="dot"></span>
-          <span id="netText">Connecting…</span>
+              <linearGradient id="textGradient" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#eeeeee"></stop>
+                <stop offset="100%" stop-color="#888888"></stop>
+              </linearGradient>
+
+              <linearGradient id="pinGradient" x1="1" y1="0" x2="0" y2="0">
+                <stop offset="0%" stop-color="#bbbbbb"></stop>
+                <stop offset="50%" stop-color="#888888"></stop>
+                <stop offset="100%" stop-color="#555555"></stop>
+              </linearGradient>
+            </defs>
+
+            <g id="traces">
+              <path d="M100 100 H200 V210 H326" class="trace-bg"></path>
+              <path d="M100 100 H200 V210 H326" class="trace-flow purple"></path>
+
+              <path d="M80 180 H180 V230 H326" class="trace-bg"></path>
+              <path d="M80 180 H180 V230 H326" class="trace-flow blue"></path>
+
+              <path d="M60 260 H150 V250 H326" class="trace-bg"></path>
+              <path d="M60 260 H150 V250 H326" class="trace-flow yellow"></path>
+
+              <path d="M100 350 H200 V270 H326" class="trace-bg"></path>
+              <path d="M100 350 H200 V270 H326" class="trace-flow green"></path>
+
+              <path d="M700 90 H560 V210 H474" class="trace-bg"></path>
+              <path d="M700 90 H560 V210 H474" class="trace-flow blue"></path>
+
+              <path d="M740 160 H580 V230 H474" class="trace-bg"></path>
+              <path d="M740 160 H580 V230 H474" class="trace-flow green"></path>
+
+              <path d="M720 250 H590 V250 H474" class="trace-bg"></path>
+              <path d="M720 250 H590 V250 H474" class="trace-flow red"></path>
+
+              <path d="M680 340 H570 V270 H474" class="trace-bg"></path>
+              <path d="M680 340 H570 V270 H474" class="trace-flow yellow"></path>
+            </g>
+
+            <rect
+              x="330"
+              y="190"
+              width="140"
+              height="100"
+              rx="20"
+              ry="20"
+              fill="url(#chipGradient)"
+              stroke="#222"
+              stroke-width="3"
+              filter="drop-shadow(0 0 6px rgba(0,0,0,0.8))"
+            ></rect>
+
+            <g>
+              <rect x="322" y="205" width="8" height="10" fill="url(#pinGradient)" rx="2"></rect>
+              <rect x="322" y="225" width="8" height="10" fill="url(#pinGradient)" rx="2"></rect>
+              <rect x="322" y="245" width="8" height="10" fill="url(#pinGradient)" rx="2"></rect>
+              <rect x="322" y="265" width="8" height="10" fill="url(#pinGradient)" rx="2"></rect>
+            </g>
+
+            <g>
+              <rect x="470" y="205" width="8" height="10" fill="url(#pinGradient)" rx="2"></rect>
+              <rect x="470" y="225" width="8" height="10" fill="url(#pinGradient)" rx="2"></rect>
+              <rect x="470" y="245" width="8" height="10" fill="url(#pinGradient)" rx="2"></rect>
+              <rect x="470" y="265" width="8" height="10" fill="url(#pinGradient)" rx="2"></rect>
+            </g>
+
+            <text
+              x="400"
+              y="240"
+              font-family="Arial, sans-serif"
+              font-size="22"
+              fill="url(#textGradient)"
+              text-anchor="middle"
+              alignment-baseline="middle"
+            >
+              ProxiCap+
+            </text>
+
+            <circle cx="100" cy="100" r="5" fill="black"></circle>
+            <circle cx="80" cy="180" r="5" fill="black"></circle>
+            <circle cx="60" cy="260" r="5" fill="black"></circle>
+            <circle cx="100" cy="350" r="5" fill="black"></circle>
+
+            <circle cx="700" cy="90" r="5" fill="black"></circle>
+            <circle cx="740" cy="160" r="5" fill="black"></circle>
+            <circle cx="720" cy="250" r="5" fill="black"></circle>
+            <circle cx="680" cy="340" r="5" fill="black"></circle>
+          </svg>
         </div>
-        <span class="pill neutral mono" id="localUpdated">Last updated: —</span>
       </div>
 
-      <header>
-        <div class="brand">
-          <h1>ProxiCap+</h1>
-          <p>Live Caretaker Monitoring Page</p>
-        </div>
-      </header>
-
-      <div id="map"></div>
-
-      <p>Lat: <span id="latVal">—</span></p>
-      <p>Lon: <span id="lonVal">—</span></p>
-      <p>Status: <span id="statusText">Waiting…</span></p>
-      <p>Address: <span id="addressText">Waiting…</span></p>
-      <p>Time: <span id="timeText">Waiting…</span></p>
-
-      <pre id="rawJson">Waiting for data…</pre>
-
+      <p id="loadingHint">Initializing dashboard…</p>
     </div>
-
   </div>
-</div>
 
-<script>
-const ENDPOINT = "https://funny-kelpie-034c79.netlify.app/.netlify/functions/update";
-const POLL_MS = 3000;
-const LOADING_MS = 5000;
+  <div id="app">
+    <div class="container">
 
-const latVal = document.getElementById("latVal");
-const lonVal = document.getElementById("lonVal");
-const statusText = document.getElementById("statusText");
-const addressText = document.getElementById("addressText");
-const timeText = document.getElementById("timeText");
-const rawJson = document.getElementById("rawJson");
+      <div class="card">
+        <div class="topbar">
+          <div class="net-status">
+            <span id="netDot" class="dot"></span>
+            <span id="netText">Connecting…</span>
+          </div>
+          <span class="pill neutral mono" id="localUpdated">Last updated: —</span>
+        </div>
 
-let map = null;
-let marker = null;
+        <header>
+          <div class="brand">
+            <h1>ProxiCap+</h1>
+            <p>Live Caretaker Monitoring Page</p>
+          </div>
+        </header>
 
-function initMap(){
-  const defaultLat = 53.5444;
-  const defaultLon = -113.4909;
+        <div class="divider"></div>
 
-  map = L.map("map").setView([defaultLat, defaultLon], 13);
+        <div id="dashboard" class="container" style="padding-top: 0;">
+          <div class="grid">
 
-  L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-    maxZoom: 19
-  }).addTo(map);
+            <div class="card">
+              <div class="card-header">
+                <div class="card-title">Geolocation</div>
+                <span class="pill neutral mono">MAP</span>
+              </div>
+              <div class="card-body">
+                <div class="map-box">
+                  <div id="map" aria-label="Map"></div>
+                </div>
 
-  marker = L.marker([defaultLat, defaultLon]).addTo(map);
-}
+                <div class="coords">
+                  <div class="coord">
+                    <div class="label">Latitude</div>
+                    <div class="value mono" id="latVal">—</div>
+                  </div>
+                  <div class="coord">
+                    <div class="label">Longitude</div>
+                    <div class="value mono" id="lonVal">—</div>
+                  </div>
+                </div>
+              </div>
+            </div>
 
-function updateMap(lat, lon, popupText){
-  if (!map || !marker) return;
+            <div class="stack">
 
-  const pos = [Number(lat), Number(lon)];
-  marker.setLatLng(pos);
+              <div class="card">
+                <div class="card-header">
+                  <div class="card-title">Status</div>
+                  <span id="statusPill" class="pill neutral">
+                    <span>●</span> <span id="statusShort">Waiting…</span>
+                  </span>
+                </div>
+                <div class="card-body">
+                  <div class="big-status" id="statusText">Waiting for status…</div>
+                </div>
+              </div>
 
-  if (popupText) marker.bindPopup(popupText);
-  map.setView(pos);
-}
+              <div class="card">
+                <div class="card-header">
+                  <div class="card-title">Address</div>
+                  <span class="pill neutral mono">TXT</span>
+                </div>
+                <div class="card-body">
+                  <div class="value-block" id="addressText">Waiting for address…</div>
+                </div>
+              </div>
 
-async function fetchData(){
-  try{
-    const res = await fetch(ENDPOINT);
-    const data = await res.json();
+              <div class="card">
+                <div class="card-header">
+                  <div class="card-title">Time</div>
+                  <span class="pill neutral mono">RTC</span>
+                </div>
+                <div class="card-body">
+                  <div class="value-block mono" id="timeText">Waiting for time…</div>
+                </div>
+              </div>
 
-    latVal.textContent = data.lat ?? "—";
-    lonVal.textContent = data.lon ?? "—";
-    addressText.textContent = data.address ?? "—";
-    timeText.textContent = data.time ?? "—";
-    statusText.textContent = data.status ?? "—";
+            </div>
+          </div>
 
-    rawJson.textContent = JSON.stringify(data, null, 2);
+          <div style="margin-top: 18px;">
+            <details id="rawdata">
+              <summary>Raw JSON (debug)</summary>
+              <div class="raw mono" id="rawJson">Waiting for data…</div>
+            </details>
+          </div>
+        </div>
 
-    const popup = `ProxiCap+<br>${data.address ?? ""}<br>${data.time ?? ""}<br>(${data.lat ?? "—"}, ${data.lon ?? "—"})`;
+      </div>
+    </div>
+  </div>
 
-    updateMap(data.lat, data.lon, popup);
+  <script>
+    const ENDPOINT = "https://funny-kelpie-034c79.netlify.app/.netlify/functions/update";
+    const POLL_MS = 3000;
+    const LOADING_MS = 5000;
 
-  } catch(err){
-    rawJson.textContent = "Error fetching data";
-  }
-}
+    const netDot = document.getElementById("netDot");
+    const netText = document.getElementById("netText");
+    const localUpdated = document.getElementById("localUpdated");
 
-setInterval(fetchData, POLL_MS);
-fetchData();
+    const latVal = document.getElementById("latVal");
+    const lonVal = document.getElementById("lonVal");
+    const statusText = document.getElementById("statusText");
+    const statusShort = document.getElementById("statusShort");
+    const statusPill = document.getElementById("statusPill");
+    const addressText = document.getElementById("addressText");
+    const timeText = document.getElementById("timeText");
+    const rawJson = document.getElementById("rawJson");
 
-window.addEventListener("load", () => {
-  if (window.L) initMap();
-});
+    let map = null;
+    let marker = null;
 
-setTimeout(() => {
-  document.getElementById("app").style.display = "block";
-  document.getElementById("loadingScreen").remove();
-}, LOADING_MS);
-</script>
+    function initMap() {
+      const defaultLat = 53.5444;
+      const defaultLon = -113.4909;
 
+      map = L.map("map", {
+        zoomControl: true,
+        attributionControl: true
+      }).setView([defaultLat, defaultLon], 13);
+
+      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+        maxZoom: 19,
+        attribution: '&copy; OpenStreetMap contributors'
+      }).addTo(map);
+
+      marker = L.marker([defaultLat, defaultLon]).addTo(map);
+      marker.bindPopup("ProxiCap+ location").openPopup();
+    }
+
+    function updateMap(lat, lon, popupText) {
+      if (!map || !marker) return;
+
+      const latNum = Number(lat);
+      const lonNum = Number(lon);
+
+      if (!Number.isFinite(latNum) || !Number.isFinite(lonNum)) return;
+
+      const newPos = [latNum, lonNum];
+      marker.setLatLng(newPos);
+      if (popupText) marker.setPopupContent(popupText);
+      map.setView(newPos, map.getZoom(), { animate: true });
+    }
+
+    function setNet(state, message){
+      netDot.classList.remove("ok", "bad");
+      if(state === "ok") netDot.classList.add("ok");
+      if(state === "bad") netDot.classList.add("bad");
+      netText.textContent = message;
+    }
+
+    function looksLikeFall(statusStr){
+      const s = String(statusStr || "").toLowerCase();
+      return s.includes("fall") || s.includes("detected") || s.includes("alert") || s.includes("emergency");
+    }
+
+    function setStatusUI(statusStr){
+      const fall = looksLikeFall(statusStr);
+      statusPill.classList.remove("ok", "bad", "neutral");
+
+      if (!statusStr || statusStr === "Waiting…") {
+        statusPill.classList.add("neutral");
+        statusShort.textContent = "Waiting…";
+        statusText.textContent = "Waiting for status…";
+        return;
+      }
+
+      if (fall){
+        statusPill.classList.add("bad");
+        statusShort.textContent = "FALL";
+        statusText.textContent = String(statusStr);
+      } else {
+        statusPill.classList.add("ok");
+        statusShort.textContent = "OK";
+        statusText.textContent = String(statusStr);
+      }
+    }
+
+    function setLastUpdatedNow(){
+      const t = new Date().toLocaleString();
+      localUpdated.textContent = "Last updated: " + t;
+    }
+
+    function setPlaceholdersWaiting(){
+      latVal.textContent = "—";
+      lonVal.textContent = "—";
+      addressText.textContent = "Waiting for address…";
+      timeText.textContent = "Waiting for time…";
+      rawJson.textContent = "Waiting for data…";
+      setStatusUI("Waiting…");
+    }
+
+    async function fetchData(){
+      try{
+        const res = await fetch(ENDPOINT);
+        const data = await res.json();
+
+        if (!data || Object.keys(data).length === 0){
+          setNet("bad", "No data yet");
+          setPlaceholdersWaiting();
+          return;
+        }
+
+        setNet("ok", "Online");
+
+        latVal.textContent = (data.lat ?? "—");
+        lonVal.textContent = (data.lon ?? "—");
+        addressText.textContent = (data.address ?? "—");
+        timeText.textContent = (data.time ?? "—");
+        setStatusUI(data.status ?? "—");
+
+        rawJson.textContent = JSON.stringify(data, null, 2);
+        setLastUpdatedNow();
+
+        const popup = `ProxiCap+<br>${data.address ?? ""}<br>${data.time ?? ""}<br>(${data.lat ?? "—"}, ${data.lon ?? "—"})`;
+        updateMap(data.lat, data.lon, popup);
+
+      } catch(err){
+        setNet("bad", "Error fetching data");
+        rawJson.textContent = "Error fetching data";
+      }
+    }
+
+    setInterval(fetchData, POLL_MS);
+    fetchData();
+
+    window.addEventListener("load", () => {
+      if (window.L) initMap();
+    });
+
+    setTimeout(() => {
+      const loading = document.getElementById("loadingScreen");
+      const app = document.getElementById("app");
+
+      app.style.display = "block";
+      loading.style.opacity = "0";
+
+      setTimeout(() => {
+        loading.remove();
+        if (map) map.invalidateSize();
+      }, 550);
+    }, LOADING_MS);
+  </script>
 </body>
 </html>
