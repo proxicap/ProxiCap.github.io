@@ -546,7 +546,7 @@
 
               <div class="card">
                 <div class="card-header">
-                  <div class="card-title">Time</div>
+                  <div class="card-title">Last Fall Time</div>
                   <span class="pill neutral mono">H:M:S</span>
                 </div>
                 <div class="card-body">
@@ -686,13 +686,13 @@
         latVal.textContent = (data.lat ?? "—");
         lonVal.textContent = (data.lon ?? "—");
         addressText.textContent = (data.address ?? "—");
-        timeText.textContent = (data.time ?? "—");
+        timeText.textContent = (data.lastFallTime ?? "—");
         setStatusUI(data.status ?? "—");
 
         rawJson.textContent = JSON.stringify(data, null, 2);
         setLastUpdatedNow();
 
-        const popup = `ProxiCap+<br>${data.address ?? ""}<br>${data.time ?? ""}<br>(${data.lat ?? "—"}, ${data.lon ?? "—"})`;
+        const popup = `ProxiCap+<br>${data.address ?? ""}<br>${data.lastFallTime ?? ""}<br>(${data.lat ?? "—"}, ${data.lon ?? "—"})`;
         updateMap(data.lat, data.lon, popup);
 
       } catch(err){
