@@ -111,32 +111,9 @@
       font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
     }
 
-    .trace-bg {
-      stroke: #333;
-      stroke-width: 1.8;
-      fill: none;
+    #app{
+      display: block;
     }
-
-    .trace-flow {
-      stroke-width: 1.8;
-      fill: none;
-      stroke-dasharray: 40 400;
-      stroke-dashoffset: 438;
-      filter: drop-shadow(0 0 6px currentColor);
-      animation: flow 3s cubic-bezier(0.5, 0, 0.9, 1) infinite;
-    }
-
-    .yellow { stroke: #ffea00; color: #ffea00; }
-    .blue   { stroke: #00ccff; color: #00ccff; }
-    .green  { stroke: #00ff15; color: #00ff15; }
-    .purple { stroke: #9900ff; color: #9900ff; }
-    .red    { stroke: #ff3300; color: #ff3300; }
-
-    @keyframes flow {
-      to { stroke-dashoffset: 0; }
-    }
-
-    #app{ display: block; }
 
     header{
       display:flex;
@@ -147,62 +124,26 @@
       text-align:center;
     }
 
-   .brand{
-  position: relative;
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  justify-content:center;
-  width: 100%;
-  height: 230px;
-  overflow: hidden;
-}
+    .brand{
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      gap:4px;
+    }
 
-.brand h1{
-  margin: 0;
-  font-size: clamp(48px, 6vw, 72px);
-  font-weight: 900;
-  letter-spacing: 0.02em;
-  position: absolute;
-  top: 8px;
-  left: 50%;
-  transform: translateX(-50%);
-  z-index: 3;
-}
+    .brand h1{
+      margin:-55px 0 40px;
+      font-size:clamp(48px,6vw,72px);
+      font-weight:900;
+      letter-spacing:0.02em;
+    }
 
-.brand p{
-  margin: 0;
-  font-size: clamp(20px, 2.5vw, 30px);
-  color: var(--muted);
-  line-height: 1.4;
-  position: absolute;
-  bottom: 8px;
-  left: 50%;
-  transform: translateX(-50%);
-  z-index: 3;
-  white-space: nowrap;
-}
-
-.header-circuit{
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  transform: translate(-50%, -50%);
-  width: min(760px, 92vw);
-  height: 160px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  opacity: 1;
-  pointer-events: none;
-  z-index: 1;
-}
-
-.header-circuit svg{
-  width: 100%;
-  height: 100%;
-  display: block;
-}
+    .brand p{
+      margin:40px 0 -55px;
+      font-size:clamp(20px,2.5vw,30px);
+      color:var(--muted);
+      line-height:1.4;
+    }
 
     .divider{
       height: 1px;
@@ -217,21 +158,8 @@
     }
 
     @media (max-width: 900px){
-  .grid{ grid-template-columns: 1fr; }
-
-  .brand{
-    height: 210px;
-  }
-
-  .brand p{
-    white-space: normal;
-  }
-
-  .header-circuit{
-   width: min(820px, 96vw);
-height: 180px;
-  }
-}
+      .grid{ grid-template-columns: 1fr; }
+    }
 
     .map-box{
       border-radius: 16px;
@@ -377,104 +305,6 @@ height: 180px;
         <header>
           <div class="brand">
             <h1>ProxiCap+</h1>
-
-            <div class="header-circuit" aria-hidden="true">
-              <svg viewBox="0 0 800 500" xmlns="http://www.w3.org/2000/svg">
-                <defs>
-                  <linearGradient id="miniChipGradient" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stop-color="#2d2d2d"></stop>
-                    <stop offset="100%" stop-color="#0f0f0f"></stop>
-                  </linearGradient>
-
-                  <linearGradient id="miniTextGradient" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stop-color="#eeeeee"></stop>
-                    <stop offset="100%" stop-color="#888888"></stop>
-                  </linearGradient>
-
-                  <linearGradient id="miniPinGradient" x1="1" y1="0" x2="0" y2="0">
-                    <stop offset="0%" stop-color="#bbbbbb"></stop>
-                    <stop offset="50%" stop-color="#888888"></stop>
-                    <stop offset="100%" stop-color="#555555"></stop>
-                  </linearGradient>
-                </defs>
-
-                <g>
-                  <path d="M100 100 H200 V210 H326" class="trace-bg"></path>
-                  <path d="M100 100 H200 V210 H326" class="trace-flow purple"></path>
-
-                  <path d="M80 180 H180 V230 H326" class="trace-bg"></path>
-                  <path d="M80 180 H180 V230 H326" class="trace-flow blue"></path>
-
-                  <path d="M60 260 H150 V250 H326" class="trace-bg"></path>
-                  <path d="M60 260 H150 V250 H326" class="trace-flow yellow"></path>
-
-                  <path d="M100 350 H200 V270 H326" class="trace-bg"></path>
-                  <path d="M100 350 H200 V270 H326" class="trace-flow green"></path>
-
-                  <path d="M700 90 H560 V210 H474" class="trace-bg"></path>
-                  <path d="M700 90 H560 V210 H474" class="trace-flow blue"></path>
-
-                  <path d="M740 160 H580 V230 H474" class="trace-bg"></path>
-                  <path d="M740 160 H580 V230 H474" class="trace-flow green"></path>
-
-                  <path d="M720 250 H590 V250 H474" class="trace-bg"></path>
-                  <path d="M720 250 H590 V250 H474" class="trace-flow red"></path>
-
-                  <path d="M680 340 H570 V270 H474" class="trace-bg"></path>
-                  <path d="M680 340 H570 V270 H474" class="trace-flow yellow"></path>
-                </g>
-
-                <rect
-                  x="330"
-                  y="190"
-                  width="140"
-                  height="100"
-                  rx="20"
-                  ry="20"
-                  fill="url(#miniChipGradient)"
-                  stroke="#222"
-                  stroke-width="3"
-                  filter="drop-shadow(0 0 6px rgba(0,0,0,0.8))"
-                ></rect>
-
-                <g>
-                  <rect x="322" y="205" width="8" height="10" fill="url(#miniPinGradient)" rx="2"></rect>
-                  <rect x="322" y="225" width="8" height="10" fill="url(#miniPinGradient)" rx="2"></rect>
-                  <rect x="322" y="245" width="8" height="10" fill="url(#miniPinGradient)" rx="2"></rect>
-                  <rect x="322" y="265" width="8" height="10" fill="url(#miniPinGradient)" rx="2"></rect>
-                </g>
-
-                <g>
-                  <rect x="470" y="205" width="8" height="10" fill="url(#miniPinGradient)" rx="2"></rect>
-                  <rect x="470" y="225" width="8" height="10" fill="url(#miniPinGradient)" rx="2"></rect>
-                  <rect x="470" y="245" width="8" height="10" fill="url(#miniPinGradient)" rx="2"></rect>
-                  <rect x="470" y="265" width="8" height="10" fill="url(#miniPinGradient)" rx="2"></rect>
-                </g>
-
-                <text
-                  x="400"
-                  y="240"
-                  font-family="Arial, sans-serif"
-                  font-size="22"
-                  fill="url(#miniTextGradient)"
-                  text-anchor="middle"
-                  alignment-baseline="middle"
-                >
-                  ProxiCap+
-                </text>
-
-                <circle cx="100" cy="100" r="5" fill="black"></circle>
-                <circle cx="80" cy="180" r="5" fill="black"></circle>
-                <circle cx="60" cy="260" r="5" fill="black"></circle>
-                <circle cx="100" cy="350" r="5" fill="black"></circle>
-
-                <circle cx="700" cy="90" r="5" fill="black"></circle>
-                <circle cx="740" cy="160" r="5" fill="black"></circle>
-                <circle cx="720" cy="250" r="5" fill="black"></circle>
-                <circle cx="680" cy="340" r="5" fill="black"></circle>
-              </svg>
-            </div>
-
             <p>Live Caretaker Monitoring Page</p>
           </div>
         </header>
@@ -537,7 +367,7 @@ height: 180px;
                   <span class="pill neutral mono">H:M:S</span>
                 </div>
                 <div class="card-body">
-                  <div class="value-block mono" id="timeText">Waiting for last fall time…</div>
+                  <div class="value-block mono" id="timeText">Waiting for time…</div>
                 </div>
               </div>
 
@@ -651,7 +481,7 @@ height: 180px;
       latVal.textContent = "—";
       lonVal.textContent = "—";
       addressText.textContent = "Waiting for address…";
-      timeText.textContent = "Waiting for last fall time…";
+      timeText.textContent = "Waiting for time…";
       rawJson.textContent = "Waiting for data…";
       setStatusUI("Waiting…");
     }
