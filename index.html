@@ -420,37 +420,6 @@
       line-height: 1.4;
     }
 
-    /* Expandable raw JSON box */
-    details{
-      border-radius: var(--radius);
-      border: 1px solid var(--border);
-      background: rgba(255,255,255,0.04);
-      overflow: hidden;
-    }
-
-    /* Header for details element */
-    summary{
-      cursor: pointer;
-      padding: 14px 16px;
-      color: var(--muted);
-      font-weight: 700;
-      letter-spacing: 0.02em;
-      list-style: none;
-    }
-
-    /* Hide default browser marker on summary */
-    summary::-webkit-details-marker{ display: none; }
-
-    /* Raw JSON text area */
-    .raw{
-      padding: 16px;
-      border-top: 1px solid var(--border);
-      white-space: pre-wrap;
-      word-break: break-word;
-      font-size: 12px;
-      color: rgba(255,255,255,0.80);
-    }
-
     /* Top bar above the main header */
     .topbar{
       display: flex;
@@ -604,13 +573,6 @@
             </div>
           </div>
 
-          <!-- Expandable debug section showing raw JSON response -->
-          <div style="margin-top: 18px;">
-            <details id="rawdata">
-              <summary>Raw JSON (debug)</summary>
-              <div class="raw mono" id="rawJson">Waiting for data…</div>
-            </details>
-          </div>
         </div>
 
       </div>
@@ -642,7 +604,6 @@
     const statusPill = document.getElementById("statusPill");
     const addressText = document.getElementById("addressText");
     const timeText = document.getElementById("timeText");
-    const rawJson = document.getElementById("rawJson");
 
     /* --------------------------------------------------
        MAP VARIABLES
@@ -772,7 +733,6 @@
       lonVal.textContent = "—";
       addressText.textContent = "Waiting for address…";
       timeText.textContent = "Waiting for time…";
-      rawJson.textContent = "Waiting for data…";
       setStatusUI("Waiting…");
     }
 
@@ -785,7 +745,6 @@
        - address
        - last fall time
        - status card
-       - raw JSON debug box
        - map marker location
     -------------------------------------------------- */
     async function fetchData(){
@@ -813,9 +772,6 @@
         timeText.textContent = (data.lastFallTime ?? "—");
         setStatusUI(data.status ?? "—");
 
-        /* Show full JSON in debug box */
-        rawJson.textContent = JSON.stringify(data, null, 2);
-
         /* Update local timestamp display */
         setLastUpdatedNow();
 
@@ -828,7 +784,6 @@
       } catch(err){
         /* If request fails, show connection error */
         setNet("bad", "Error fetching data");
-        rawJson.textContent = "Error fetching data";
       }
     }
 
