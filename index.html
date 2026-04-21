@@ -1,20 +1,15 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <!-- Basic page setup -->
   <meta charset="UTF-8" />
-  <!-- Makes the page scale properly on phones and smaller screens -->
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <!-- Browser tab title -->
-  <title>ProxiCap+ Dashboard</title> 
+  <title>ProxiCap+ Dashboard</title>
 
-  <!-- Leaflet CSS for the interactive map -->
   <link
     rel="stylesheet"
     href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
   />
 
-  <!-- Leaflet JavaScript for map features -->
   <script
     src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
     defer
@@ -24,14 +19,12 @@
     :root{
       --bg: #0f1117;
       --panel: rgba(255,255,255,0.06);
-      --panel-2: rgba(255,255,255,0.08);
       --border: rgba(255,255,255,0.10);
       --text: rgba(255,255,255,0.92);
       --muted: rgba(255,255,255,0.65);
       --muted2: rgba(255,255,255,0.45);
 
       --ok: #00ff15;
-      --warn: #ffea00;
       --bad: #ff3300;
       --accent: #00ccff;
 
@@ -52,7 +45,10 @@
       color: var(--text);
     }
 
-    a { color: inherit; text-decoration: none; }
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
 
     .container{
       width: min(1100px, 92vw);
@@ -126,11 +122,11 @@
     }
 
     header{
-      display:flex;
-      flex-direction:column;
-      align-items:center;
-      justify-content:center;
-      text-align:center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
       height: 180px;
       padding: 0;
     }
@@ -186,7 +182,9 @@
     }
 
     @media (max-width: 768px){
-      .grid{ grid-template-columns: 1fr; }
+      .grid{
+        grid-template-columns: 1fr;
+      }
     }
 
     @media (max-width: 650px){
@@ -263,57 +261,13 @@
       color: var(--text);
       word-break: break-word;
     }
-
-    .topbar{
-      display: flex;
-      align-items: center;
-      justify-content: flex-start;
-      gap: 12px;
-      padding: 12px 18px;
-      border-bottom: 1px solid var(--border);
-    }
-
-    .net-status{
-      display: inline-flex;
-      align-items: center;
-      gap: 10px;
-      color: var(--muted);
-      font-weight: 700;
-      font-size: 13px;
-    }
-
-    .dot{
-      width: 10px;
-      height: 10px;
-      border-radius: 50%;
-      background: rgba(255,255,255,0.22);
-      box-shadow: 0 0 16px rgba(255,255,255,0.10);
-    }
-
-    .dot.ok{
-      background: rgba(0,255,21,0.80);
-      box-shadow: 0 0 18px rgba(0,255,21,0.22);
-    }
-
-    .dot.bad{
-      background: rgba(255,51,0,0.85);
-      box-shadow: 0 0 18px rgba(255,51,0,0.22);
-    }
   </style>
 </head>
 
 <body>
-
   <div id="app">
     <div class="container">
       <div class="card">
-
-        <div class="topbar">
-          <div class="net-status">
-            <span id="netDot" class="dot"></span>
-            <span id="netText">Connecting…</span>
-          </div>
-        </div>
 
         <header>
           <div class="brand">
@@ -390,7 +344,6 @@
 
             </div>
           </div>
-
         </div>
 
       </div>
@@ -400,9 +353,6 @@
   <script>
     const ENDPOINT = "https://funny-kelpie-034c79.netlify.app/.netlify/functions/update";
     const POLL_MS = 3000;
-
-    const netDot = document.getElementById("netDot");
-    const netText = document.getElementById("netText");
 
     const latVal = document.getElementById("latVal");
     const lonVal = document.getElementById("lonVal");
@@ -449,13 +399,6 @@
       map.setView(newPos, map.getZoom(), { animate: true });
     }
 
-    function setNet(state, message){
-      netDot.classList.remove("ok", "bad");
-      if(state === "ok") netDot.classList.add("ok");
-      if(state === "bad") netDot.classList.add("bad");
-      netText.textContent = message;
-    }
-
     function looksLikeFall(statusStr){
       const s = String(statusStr || "").toLowerCase();
       return s.includes("fall") || s.includes("detected") || s.includes("alert") || s.includes("emergency");
@@ -497,12 +440,9 @@
         const data = await res.json();
 
         if (!data || Object.keys(data).length === 0){
-          setNet("bad", "No data yet");
           setPlaceholdersWaiting();
           return;
         }
-
-        setNet("ok", "Online");
 
         latVal.textContent = (data.lat ?? "—");
         lonVal.textContent = (data.lon ?? "—");
@@ -515,7 +455,7 @@
         updateMap(data.lat, data.lon, popup);
 
       } catch(err){
-        setNet("bad", "Error fetching data");
+        setPlaceholdersWaiting();
       }
     }
 
