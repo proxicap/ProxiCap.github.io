@@ -21,11 +21,6 @@
   ></script>
 
   <style>
-    /* --------------------------------------------------
-       ROOT VARIABLES
-       These CSS variables store colors, shadows, radius, etc.
-       This makes the theme easier to manage in one place.
-    -------------------------------------------------- */
     :root{
       --bg: #0f1117;
       --panel: rgba(255,255,255,0.06);
@@ -44,16 +39,10 @@
       --radius: 18px;
     }
 
-    /* Makes width/height include padding and border */
     * { box-sizing: border-box; }
 
-    /* Full height layout */
     html, body { height: 100%; }
 
-    /* --------------------------------------------------
-       PAGE BODY STYLING
-       Creates the dark background and glowing gradient effect
-    -------------------------------------------------- */
     body{
       margin: 0;
       font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
@@ -63,17 +52,14 @@
       color: var(--text);
     }
 
-    /* Links inherit page color and have no underline */
     a { color: inherit; text-decoration: none; }
 
-    /* Main outer page width and spacing */
     .container{
       width: min(1100px, 92vw);
       margin: 0 auto;
       padding: 28px 0 60px;
     }
 
-    /* Standard card look used throughout page */
     .card{
       background: var(--panel);
       border: 1px solid var(--border);
@@ -83,7 +69,6 @@
       backdrop-filter: blur(10px);
     }
 
-    /* Top section inside a card */
     .card-header{
       padding: 16px 18px;
       border-bottom: 1px solid var(--border);
@@ -93,7 +78,6 @@
       gap: 12px;
     }
 
-    /* Small uppercase heading text for card titles */
     .card-title{
       font-size: 14px;
       letter-spacing: 0.08em;
@@ -101,12 +85,10 @@
       color: var(--muted);
     }
 
-    /* Main content area inside each card */
     .card-body{
       padding: 18px;
     }
 
-    /* Pill style used for labels/status boxes */
     .pill{
       display: inline-flex;
       align-items: center;
@@ -120,47 +102,37 @@
       user-select: none;
     }
 
-    /* Green pill state */
     .pill.ok{
       border-color: rgba(0,255,21,0.35);
       box-shadow: 0 0 18px rgba(0,255,21,0.12);
     }
 
-    /* Red pill state */
     .pill.bad{
       border-color: rgba(255,51,0,0.35);
       box-shadow: 0 0 18px rgba(255,51,0,0.12);
     }
 
-    /* Neutral blue pill state */
     .pill.neutral{
       border-color: rgba(0,204,255,0.25);
       box-shadow: 0 0 18px rgba(0,204,255,0.10);
     }
 
-    /* Monospace font for things like coordinates/time/raw JSON */
     .mono{
       font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
     }
 
-    /* Main app wrapper */
     #app{
       display: block;
     }
 
-    /* --------------------------------------------------
-       HEADER / BRAND AREA
-       Holds title, subtitle, and radar loaders
-    -------------------------------------------------- */
     header{
       display:flex;
       flex-direction:column;
       align-items:center;
       justify-content:center;
-      padding:40px 18px;
       text-align:center;
-      height: 180px;    
-      padding: 0;               
+      height: 180px;
+      padding: 0;
     }
 
     .brand{
@@ -171,25 +143,20 @@
       justify-content: center;
     }
 
-    /* Horizontal row that contains left loader, text, right loader */
     .brand-row{
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 110px;
       width: 100%;
     }
 
-    /* Text block for page title and subtitle */
     .brand-text{
-      flex: 0;
       text-align: center;
       display: flex;
       flex-direction: column;
       align-items: center;
     }
 
-    /* Main title */
     .brand h1{
       margin: 0;
       font-size: clamp(48px, 6vw, 72px);
@@ -198,7 +165,6 @@
       line-height: 1.05;
     }
 
-    /* Subtitle */
     .brand p{
       margin: 10px 0 0;
       font-size: clamp(20px, 2.5vw, 30px);
@@ -207,137 +173,28 @@
       white-space: nowrap;
     }
 
-    /* --------------------------------------------------
-       LOADER / RADAR DESIGN
-       Decorative animated radar circles from Uiverse
-    -------------------------------------------------- */
-    .loader {
-      position: relative;
-      width: 110px;
-      height: 110px;
-      background: transparent;
-      border-radius: 50%;
-      box-shadow: 25px 25px 75px rgba(0,0,0,0.55);
-      border: 1px solid #333;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      overflow: hidden;
-      flex-shrink: 0;
-      margin: 0 10px;
-    }
-
-    /* Outer dashed ring */
-    .loader::before {
-      content: '';
-      position: absolute;
-      inset: 20px;
-      background: transparent;
-      border: 1px dashed #444;
-      border-radius: 50%;
-      box-shadow: inset -5px -5px 25px rgba(0,0,0,0.25),
-      inset 5px 5px 35px rgba(0,0,0,0.25);
-    }
-
-    /* Inner dashed ring */
-    .loader::after {
-      content: '';
-      position: absolute;
-      width: 50px;
-      height: 50px;
-      border-radius: 50%;
-      border: 1px dashed #444;
-      box-shadow: inset -5px -5px 25px rgba(0,0,0,0.25),
-      inset 5px 5px 35px rgba(0,0,0,0.25);
-    }
-
-    /* Rotating radar sweep arm */
-    .loader span {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      width: 50%;
-      height: 100%;
-      background: transparent;
-      transform-origin: top left;
-      animation: radar81 2s linear infinite;
-      border-top: 1px dashed #fff;
-    }
-
-    /* Glowing radar beam effect */
-    .loader span::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: seagreen;
-      transform-origin: top left;
-      transform: rotate(-55deg);
-      filter: blur(30px) drop-shadow(20px 20px 20px seagreen);
-    }
-
-    /* Rotation animation for radar sweep */
-    @keyframes radar81 {
-      0% {
-        transform: rotate(0deg);
-      }
-
-      100% {
-        transform: rotate(360deg);
-      }
-    }
-
-    /* Horizontal divider line under header */
     .divider{
       height: 1px;
       background: rgba(255,255,255,0.10);
       margin: 26px 0;
     }
 
-    /* Main dashboard layout: map left, status cards right */
     .grid{
       display: grid;
       grid-template-columns: 1.25fr 0.75fr;
       gap: 16px;
     }
 
-    /* --------------------------------------------------
-       TABLET / SMALL SCREEN ADJUSTMENTS
-    -------------------------------------------------- */
     @media (max-width: 768px){
       .grid{ grid-template-columns: 1fr; }
-
-      .brand-row{
-        gap: 14px;
-      }
-
-      /* Hide decorative radar loaders on smaller screens */
-      .loader{
-        display: none;
-        width: 80px;
-        height: 80px;
-      }
-
-      .loader::before{
-        inset: 14px;
-      }
-
-      .loader::after{
-        width: 34px;
-        height: 34px;
-      }
     }
 
-    /* Stack brand content vertically on very small screens */
     @media (max-width: 650px){
       .brand-row{
         flex-direction: column;
       }
     }
 
-    /* Map card container styling */
     .map-box{
       border-radius: 16px;
       border: 1px dashed rgba(0,204,255,0.30);
@@ -347,13 +204,11 @@
       overflow: hidden;
     }
 
-    /* Actual map div */
     #map{
       width: 100%;
       min-height: 260px;
     }
 
-    /* Custom map zoom button look */
     .leaflet-control-zoom a{
       background: rgba(15,17,23,0.85);
       color: rgba(255,255,255,0.9);
@@ -364,7 +219,6 @@
       background: rgba(15,17,23,0.95);
     }
 
-    /* Latitude and longitude display boxes */
     .coords{
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -392,20 +246,17 @@
       font-weight: 800;
     }
 
-    /* Vertical stack for the right-side cards */
     .stack{
       display: grid;
       gap: 16px;
     }
 
-    /* Big status message text */
     .big-status{
       font-size: 18px;
       font-weight: 900;
       letter-spacing: 0.01em;
     }
 
-    /* Normal data text block */
     .value-block{
       font-size: 15px;
       line-height: 1.45;
@@ -413,14 +264,12 @@
       word-break: break-word;
     }
 
-    /* Muted helper text style */
     .muted{
       color: var(--muted);
       font-size: 13px;
       line-height: 1.4;
     }
 
-    /* Top bar above the main header */
     .topbar{
       display: flex;
       align-items: center;
@@ -430,7 +279,6 @@
       border-bottom: 1px solid var(--border);
     }
 
-    /* Network status text and dot layout */
     .net-status{
       display: inline-flex;
       align-items: center;
@@ -440,7 +288,6 @@
       font-size: 13px;
     }
 
-    /* Default status dot */
     .dot{
       width: 10px;
       height: 10px;
@@ -449,13 +296,11 @@
       box-shadow: 0 0 16px rgba(255,255,255,0.10);
     }
 
-    /* Green status dot */
     .dot.ok{
       background: rgba(0,255,21,0.80);
       box-shadow: 0 0 18px rgba(0,255,21,0.22);
     }
 
-    /* Red status dot */
     .dot.bad{
       background: rgba(255,51,0,0.85);
       box-shadow: 0 0 18px rgba(255,51,0,0.22);
@@ -465,14 +310,10 @@
 
 <body>
 
-  <!-- Main application wrapper -->
   <div id="app">
     <div class="container">
-
-      <!-- Outer card holding the entire dashboard -->
       <div class="card">
 
-        <!-- Top connection status bar -->
         <div class="topbar">
           <div class="net-status">
             <span id="netDot" class="dot"></span>
@@ -481,34 +322,22 @@
           <span class="pill neutral mono" id="localUpdated">Last updated: —</span>
         </div>
 
-        <!-- Page header with title and animated radar loaders -->
         <header>
           <div class="brand">
             <div class="brand-row">
-              <div class="loader">
-                <span></span>
-              </div>
-
               <div class="brand-text">
                 <h1>ProxiCap+</h1>
                 <p>Live Caretaker Monitoring Page</p>
-              </div>
-
-              <div class="loader">
-                <span></span>
               </div>
             </div>
           </div>
         </header>
 
-        <!-- Divider line between header and dashboard -->
         <div class="divider"></div>
 
-        <!-- Dashboard content -->
         <div id="dashboard" class="container" style="padding-top: 0;">
           <div class="grid">
 
-            <!-- Left side: map and coordinate display -->
             <div class="card">
               <div class="card-header">
                 <div class="card-title">Geolocation</div>
@@ -532,10 +361,8 @@
               </div>
             </div>
 
-            <!-- Right side: status, address, and last fall time -->
             <div class="stack">
 
-              <!-- Status card -->
               <div class="card">
                 <div class="card-header">
                   <div class="card-title">Status</div>
@@ -548,7 +375,6 @@
                 </div>
               </div>
 
-              <!-- Address card -->
               <div class="card">
                 <div class="card-header">
                   <div class="card-title">Current Location</div>
@@ -559,7 +385,6 @@
                 </div>
               </div>
 
-              <!-- Last fall time card -->
               <div class="card">
                 <div class="card-header">
                   <div class="card-title">Last Fall Detected</div>
@@ -580,19 +405,9 @@
   </div>
 
   <script>
-    /* --------------------------------------------------
-       CONFIGURATION
-       ENDPOINT = your Netlify backend URL
-       POLL_MS = how often the page requests new data
-    -------------------------------------------------- */
     const ENDPOINT = "https://funny-kelpie-034c79.netlify.app/.netlify/functions/update";
     const POLL_MS = 3000;
 
-    /* --------------------------------------------------
-       ELEMENT REFERENCES
-       These connect JavaScript variables to HTML elements
-       so they can be updated later.
-    -------------------------------------------------- */
     const netDot = document.getElementById("netDot");
     const netText = document.getElementById("netText");
     const localUpdated = document.getElementById("localUpdated");
@@ -605,19 +420,9 @@
     const addressText = document.getElementById("addressText");
     const timeText = document.getElementById("timeText");
 
-    /* --------------------------------------------------
-       MAP VARIABLES
-       map = Leaflet map object
-       marker = marker placed on the map
-    -------------------------------------------------- */
     let map = null;
     let marker = null;
 
-    /* --------------------------------------------------
-       initMap()
-       Creates the Leaflet map with a default location.
-       This default point is used until real device data arrives.
-    -------------------------------------------------- */
     function initMap() {
       const defaultLat = 53.5444;
       const defaultLon = -113.4909;
@@ -636,35 +441,22 @@
       marker.bindPopup("ProxiCap+ location").openPopup();
     }
 
-    /* --------------------------------------------------
-       updateMap(lat, lon, popupText)
-       Updates marker position and recenters the map.
-       Only runs if map and marker already exist.
-    -------------------------------------------------- */
     function updateMap(lat, lon, popupText) {
       if (!map || !marker) return;
 
       const latNum = Number(lat);
       const lonNum = Number(lon);
 
-      /* Ignore bad coordinate values */
       if (!Number.isFinite(latNum) || !Number.isFinite(lonNum)) return;
 
       const newPos = [latNum, lonNum];
       marker.setLatLng(newPos);
 
-      /* Update popup text if one was provided */
       if (popupText) marker.setPopupContent(popupText);
 
-      /* Recenter map on new coordinates */
       map.setView(newPos, map.getZoom(), { animate: true });
     }
 
-    /* --------------------------------------------------
-       setNet(state, message)
-       Updates the connection status dot and text.
-       state can be: "ok", "bad", or neutral if neither is added
-    -------------------------------------------------- */
     function setNet(state, message){
       netDot.classList.remove("ok", "bad");
       if(state === "ok") netDot.classList.add("ok");
@@ -672,24 +464,11 @@
       netText.textContent = message;
     }
 
-    /* --------------------------------------------------
-       looksLikeFall(statusStr)
-       Checks the status text and decides if it sounds like
-       a fall/emergency condition.
-       Returns true if it finds matching words.
-    -------------------------------------------------- */
     function looksLikeFall(statusStr){
       const s = String(statusStr || "").toLowerCase();
       return s.includes("fall") || s.includes("detected") || s.includes("alert") || s.includes("emergency");
     }
 
-    /* --------------------------------------------------
-       setStatusUI(statusStr)
-       Updates the status card based on the incoming status text.
-       - Neutral if waiting
-       - Red if fall/emergency detected
-       - Green if normal
-    -------------------------------------------------- */
     function setStatusUI(statusStr){
       const fall = looksLikeFall(statusStr);
       statusPill.classList.remove("ok", "bad", "neutral");
@@ -712,22 +491,11 @@
       }
     }
 
-    /* --------------------------------------------------
-       setLastUpdatedNow()
-       Shows the current local date/time in the top bar.
-       This tells the viewer when the page was last refreshed
-       with data from the backend.
-    -------------------------------------------------- */
     function setLastUpdatedNow(){
       const t = new Date().toLocaleString();
       localUpdated.textContent = "Last updated: " + t;
     }
 
-    /* --------------------------------------------------
-       setPlaceholdersWaiting()
-       Resets displayed values to waiting/default state.
-       Used when no valid data is available yet.
-    -------------------------------------------------- */
     function setPlaceholdersWaiting(){
       latVal.textContent = "—";
       lonVal.textContent = "—";
@@ -736,77 +504,42 @@
       setStatusUI("Waiting…");
     }
 
-    /* --------------------------------------------------
-       fetchData()
-       Gets the latest JSON data from the Netlify backend.
-       Then updates:
-       - network status
-       - coordinates
-       - address
-       - last fall time
-       - status card
-       - map marker location
-    -------------------------------------------------- */
     async function fetchData(){
       try{
-        /* Send request to backend */
         const res = await fetch(ENDPOINT);
-
-        /* Convert response into JavaScript object */
         const data = await res.json();
 
-        /* If backend returned empty data, show waiting state */
         if (!data || Object.keys(data).length === 0){
           setNet("bad", "No data yet");
           setPlaceholdersWaiting();
           return;
         }
 
-        /* Backend responded successfully */
         setNet("ok", "Online");
 
-        /* Update visible data fields */
         latVal.textContent = (data.lat ?? "—");
         lonVal.textContent = (data.lon ?? "—");
         addressText.textContent = (data.address ?? "—");
         timeText.textContent = (data.lastFallTime ?? "—");
         setStatusUI(data.status ?? "—");
 
-        /* Update local timestamp display */
         setLastUpdatedNow();
 
-        /* Text shown when marker popup is opened */
         const popup = `ProxiCap+<br>${data.address ?? ""}<br>${data.lastFallTime ?? ""}<br>(${data.lat ?? "—"}, ${data.lon ?? "—"})`;
 
-        /* Move map marker to latest coordinates */
         updateMap(data.lat, data.lon, popup);
 
       } catch(err){
-        /* If request fails, show connection error */
         setNet("bad", "Error fetching data");
       }
     }
 
-    /* --------------------------------------------------
-       POLLING
-       Calls fetchData every 3 seconds so the dashboard keeps
-       updating automatically.
-    -------------------------------------------------- */
     setInterval(fetchData, POLL_MS);
-
-    /* Run once immediately so page does not wait 3 seconds */
     fetchData();
 
-    /* --------------------------------------------------
-       MAP INITIALIZATION ON PAGE LOAD
-       Wait until the page and Leaflet are loaded before
-       building the map.
-    -------------------------------------------------- */
     window.addEventListener("load", () => {
       if (window.L) {
         initMap();
-
-        /* Helps Leaflet render correctly after page load */
         if (map) map.invalidateSize();
       }
     });
