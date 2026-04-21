@@ -264,16 +264,10 @@
       word-break: break-word;
     }
 
-    .muted{
-      color: var(--muted);
-      font-size: 13px;
-      line-height: 1.4;
-    }
-
     .topbar{
       display: flex;
       align-items: center;
-      justify-content: space-between;
+      justify-content: flex-start;
       gap: 12px;
       padding: 12px 18px;
       border-bottom: 1px solid var(--border);
@@ -319,7 +313,6 @@
             <span id="netDot" class="dot"></span>
             <span id="netText">Connecting…</span>
           </div>
-          <span class="pill neutral mono" id="localUpdated">Last updated: —</span>
         </div>
 
         <header>
@@ -410,7 +403,6 @@
 
     const netDot = document.getElementById("netDot");
     const netText = document.getElementById("netText");
-    const localUpdated = document.getElementById("localUpdated");
 
     const latVal = document.getElementById("latVal");
     const lonVal = document.getElementById("lonVal");
@@ -491,11 +483,6 @@
       }
     }
 
-    function setLastUpdatedNow(){
-      const t = new Date().toLocaleString();
-      localUpdated.textContent = "Last updated: " + t;
-    }
-
     function setPlaceholdersWaiting(){
       latVal.textContent = "—";
       lonVal.textContent = "—";
@@ -522,8 +509,6 @@
         addressText.textContent = (data.address ?? "—");
         timeText.textContent = (data.lastFallTime ?? "—");
         setStatusUI(data.status ?? "—");
-
-        setLastUpdatedNow();
 
         const popup = `ProxiCap+<br>${data.address ?? ""}<br>${data.lastFallTime ?? ""}<br>(${data.lat ?? "—"}, ${data.lon ?? "—"})`;
 
