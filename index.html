@@ -322,16 +322,6 @@
 
               <div class="card">
                 <div class="card-header">
-                  <div class="card-title">Current Location</div>
-                  <span class="pill neutral mono">ADD</span>
-                </div>
-                <div class="card-body">
-                  <div class="value-block" id="addressText">Waiting for address…</div>
-                </div>
-              </div>
-
-              <div class="card">
-                <div class="card-header">
                   <div class="card-title">Last Fall Detected</div>
                   <span class="pill neutral mono">H:M:S</span>
                 </div>
@@ -357,7 +347,6 @@
     const statusText = document.getElementById("statusText");
     const statusShort = document.getElementById("statusShort");
     const statusPill = document.getElementById("statusPill");
-    const addressText = document.getElementById("addressText");
     const timeText = document.getElementById("timeText");
 
     let map = null;
@@ -427,7 +416,6 @@
     function setPlaceholdersWaiting(){
       latVal.textContent = "—";
       lonVal.textContent = "—";
-      addressText.textContent = "Waiting for address…";
       timeText.textContent = "Waiting for time…";
       setStatusUI("Waiting…");
     }
@@ -444,11 +432,10 @@
 
         latVal.textContent = (data.lat ?? "—");
         lonVal.textContent = (data.lon ?? "—");
-        addressText.textContent = (data.address ?? "—");
         timeText.textContent = (data.lastFallTime ?? "—");
         setStatusUI(data.status ?? "—");
 
-        const popup = `ProxiCap+<br>${data.address ?? ""}<br>${data.lastFallTime ?? ""}<br>(${data.lat ?? "—"}, ${data.lon ?? "—"})`;
+        const popup = `ProxiCap+<br>${data.lastFallTime ?? ""}<br>(${data.lat ?? "—"}, ${data.lon ?? "—"})`;
 
         updateMap(data.lat, data.lon, popup);
 
