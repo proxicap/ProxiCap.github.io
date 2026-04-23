@@ -1,21 +1,29 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <!-- Basic page character encoding -->
   <meta charset="UTF-8" />
+
+  <!-- Makes the page scale properly on phones and smaller screens -->
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <!-- Browser tab title -->
   <title>ProxiCap+ Dashboard</title>
 
+  <!-- Leaflet CSS: styles the interactive map, zoom buttons, and marker layout -->
   <link
     rel="stylesheet"
     href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
   />
 
+  <!-- Leaflet JavaScript: provides map functions like L.map(), L.tileLayer(), and L.marker() -->
   <script
     src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
     defer
   ></script>
 
   <style>
+    /* Root color variables used across the dashboard */
     :root{
       --bg: #0f1117;
       --panel: rgba(255,255,255,0.06);
@@ -32,10 +40,13 @@
       --radius: 18px;
     }
 
+    /* Makes padding and border count inside width/height */
     * { box-sizing: border-box; }
 
+    /* Allow full-page height */
     html, body { height: 100%; }
 
+    /* Main page styling */
     body{
       margin: 0;
       font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
@@ -43,17 +54,20 @@
       color: var(--text);
     }
 
+    /* Links keep the page text color */
     a {
       color: inherit;
       text-decoration: none;
     }
 
+    /* Main page wrapper width and outer spacing */
     .container{
       width: min(1100px, 92vw);
       margin: 0 auto;
       padding: 28px 0 60px;
     }
 
+    /* General card style used for dashboard sections */
     .card{
       background: var(--panel);
       border: 1px solid var(--border);
@@ -63,6 +77,7 @@
       backdrop-filter: blur(10px);
     }
 
+    /* Header row at top of each card */
     .card-header{
       padding: 16px 18px;
       border-bottom: 1px solid var(--border);
@@ -72,6 +87,7 @@
       gap: 12px;
     }
 
+    /* Small uppercase section title text */
     .card-title{
       font-size: 14px;
       letter-spacing: 0.08em;
@@ -79,10 +95,12 @@
       color: var(--muted);
     }
 
+    /* Card content area */
     .card-body{
       padding: 18px;
     }
 
+    /* Small rounded label style */
     .pill{
       display: inline-flex;
       align-items: center;
@@ -96,29 +114,35 @@
       user-select: none;
     }
 
+    /* Green status pill */
     .pill.ok{
       border-color: rgba(0,255,21,0.35);
       box-shadow: 0 0 18px rgba(0,255,21,0.12);
     }
 
+    /* Red status pill */
     .pill.bad{
       border-color: rgba(255,51,0,0.35);
       box-shadow: 0 0 18px rgba(255,51,0,0.12);
     }
 
+    /* Neutral status pill */
     .pill.neutral{
       border-color: rgba(0,204,255,0.25);
       box-shadow: 0 0 18px rgba(0,204,255,0.10);
     }
 
+    /* Monospace font for coordinates and times */
     .mono{
       font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
     }
 
+    /* Main app wrapper */
     #app{
       display: block;
     }
 
+    /* Page header area for project title */
     header{
       display: flex;
       flex-direction: column;
@@ -129,6 +153,7 @@
       padding: 0;
     }
 
+    /* Centers the title block */
     .brand{
       width: 100%;
       height: 100%;
@@ -137,6 +162,7 @@
       justify-content: center;
     }
 
+    /* Holds the title content */
     .brand-row{
       display: flex;
       align-items: center;
@@ -144,6 +170,7 @@
       width: 100%;
     }
 
+    /* Title and subtitle container */
     .brand-text{
       text-align: center;
       display: flex;
@@ -151,6 +178,7 @@
       align-items: center;
     }
 
+    /* Main page heading */
     .brand h1{
       margin: 0;
       font-size: clamp(48px, 6vw, 72px);
@@ -159,6 +187,7 @@
       line-height: 1.05;
     }
 
+    /* Subtitle under main heading */
     .brand p{
       margin: 10px 0 0;
       font-size: clamp(20px, 2.5vw, 30px);
@@ -167,30 +196,35 @@
       white-space: nowrap;
     }
 
+    /* Divider line between header and dashboard */
     .divider{
       height: 1px;
       background: rgba(255,255,255,0.10);
       margin: 26px 0;
     }
 
+    /* Main layout: map on left, data cards on right */
     .grid{
       display: grid;
       grid-template-columns: 1.25fr 0.75fr;
       gap: 16px;
     }
 
+    /* On smaller screens, stack the layout vertically */
     @media (max-width: 768px){
       .grid{
         grid-template-columns: 1fr;
       }
     }
 
+    /* Small-screen header stacking if needed */
     @media (max-width: 650px){
       .brand-row{
         flex-direction: column;
       }
     }
 
+    /* Box around the Leaflet map */
     .map-box{
       border-radius: 16px;
       border: 1px dashed rgba(0,204,255,0.30);
@@ -200,21 +234,25 @@
       overflow: hidden;
     }
 
+    /* Actual map element that Leaflet draws into */
     #map{
       width: 100%;
       min-height: 260px;
     }
 
+    /* Style for Leaflet zoom buttons */
     .leaflet-control-zoom a{
       background: rgba(15,17,23,0.85);
       color: rgba(255,255,255,0.9);
       border: 1px solid rgba(255,255,255,0.12);
     }
 
+    /* Hover style for zoom buttons */
     .leaflet-control-zoom a:hover{
       background: rgba(15,17,23,0.95);
     }
 
+    /* Layout for latitude and longitude cards */
     .coords{
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -222,6 +260,7 @@
       margin-top: 14px;
     }
 
+    /* Individual coordinate display box */
     .coord{
       padding: 12px 12px;
       border-radius: 14px;
@@ -229,6 +268,7 @@
       background: rgba(255,255,255,0.04);
     }
 
+    /* Small label like LATITUDE / LONGITUDE */
     .coord .label{
       font-size: 12px;
       color: var(--muted2);
@@ -237,22 +277,26 @@
       margin-bottom: 6px;
     }
 
+    /* Numeric coordinate value styling */
     .coord .value{
       font-size: 18px;
       font-weight: 800;
     }
 
+    /* Right-side card stack */
     .stack{
       display: grid;
       gap: 16px;
     }
 
+    /* Main status text */
     .big-status{
       font-size: 18px;
       font-weight: 900;
       letter-spacing: 0.01em;
     }
 
+    /* Normal text block used for time display */
     .value-block{
       font-size: 15px;
       line-height: 1.45;
@@ -263,10 +307,12 @@
 </head>
 
 <body>
+  <!-- Main page wrapper -->
   <div id="app">
     <div class="container">
       <div class="card">
 
+        <!-- Dashboard title area -->
         <header>
           <div class="brand">
             <div class="brand-row">
@@ -278,11 +324,14 @@
           </div>
         </header>
 
+        <!-- Divider below title -->
         <div class="divider"></div>
 
+        <!-- Main dashboard section -->
         <div id="dashboard" class="container" style="padding-top: 0;">
           <div class="grid">
 
+            <!-- Left column: map and coordinates -->
             <div class="card">
               <div class="card-header">
                 <div class="card-title">Geolocation</div>
@@ -290,9 +339,11 @@
               </div>
               <div class="card-body">
                 <div class="map-box">
+                  <!-- Leaflet inserts the interactive map into this div -->
                   <div id="map" aria-label="Map"></div>
                 </div>
 
+                <!-- Coordinate display -->
                 <div class="coords">
                   <div class="coord">
                     <div class="label">Latitude</div>
@@ -306,8 +357,10 @@
               </div>
             </div>
 
+            <!-- Right column: status and last fall time -->
             <div class="stack">
 
+              <!-- Current status card -->
               <div class="card">
                 <div class="card-header">
                   <div class="card-title">Status</div>
@@ -320,6 +373,7 @@
                 </div>
               </div>
 
+              <!-- Last fall detected card -->
               <div class="card">
                 <div class="card-header">
                   <div class="card-title">Last Fall Detected</div>
@@ -339,62 +393,104 @@
   </div>
 
   <script>
+    // ================= CONFIG =================
+
+    // Netlify backend endpoint that stores and returns the latest device data
     const ENDPOINT = "https://funny-kelpie-034c79.netlify.app/.netlify/functions/update";
+
+    // Frontend refresh rate in milliseconds
     const POLL_MS = 3000;
 
+    // ================= HTML ELEMENT REFERENCES =================
+
+    // Coordinate display fields
     const latVal = document.getElementById("latVal");
     const lonVal = document.getElementById("lonVal");
+
+    // Status display fields
     const statusText = document.getElementById("statusText");
     const statusShort = document.getElementById("statusShort");
     const statusPill = document.getElementById("statusPill");
+
+    // Last fall time display field
     const timeText = document.getElementById("timeText");
 
+    // ================= MAP VARIABLES =================
+
+    // Leaflet map object
     let map = null;
+
+    // Marker used to show current location on the map
     let marker = null;
 
+    // ================= INITIALIZE MAP =================
     function initMap() {
+      // Default map location before real data arrives
       const defaultLat = 53.5444;
       const defaultLon = -113.4909;
 
+      // Create a Leaflet map inside the div with id="map"
       map = L.map("map", {
         zoomControl: true,
         attributionControl: true
       }).setView([defaultLat, defaultLon], 13);
 
+      // Load OpenStreetMap tiles so the map has visible roads/background
       L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
         maxZoom: 19,
         attribution: '&copy; OpenStreetMap contributors'
       }).addTo(map);
 
+      // Place an initial marker at the default location
       marker = L.marker([defaultLat, defaultLon]).addTo(map);
+
+      // Show text if the marker popup is opened
       marker.bindPopup("ProxiCap+ location").openPopup();
     }
 
+    // ================= UPDATE MAP =================
     function updateMap(lat, lon, popupText) {
+      // Stop if the map has not been created yet
       if (!map || !marker) return;
 
+      // Convert incoming values into numbers
       const latNum = Number(lat);
       const lonNum = Number(lon);
 
+      // Stop if coordinates are invalid
       if (!Number.isFinite(latNum) || !Number.isFinite(lonNum)) return;
 
+      // Store new marker position
       const newPos = [latNum, lonNum];
+
+      // Move the marker to the newest coordinates
       marker.setLatLng(newPos);
 
+      // Update popup text if provided
       if (popupText) marker.setPopupContent(popupText);
 
+      // Recenter the map on the latest location
       map.setView(newPos, map.getZoom(), { animate: true });
     }
 
+    // ================= STATUS HELPER =================
     function looksLikeFall(statusStr){
+      // Convert status to lowercase text safely
       const s = String(statusStr || "").toLowerCase();
+
+      // Returns true if the status text suggests a fall/emergency state
       return s.includes("fall") || s.includes("detected") || s.includes("alert") || s.includes("emergency");
     }
 
+    // ================= UPDATE STATUS UI =================
     function setStatusUI(statusStr){
+      // Determine whether the status should be treated as a fall alert
       const fall = looksLikeFall(statusStr);
+
+      // Clear previous color state
       statusPill.classList.remove("ok", "bad", "neutral");
 
+      // Waiting state when no real data is available yet
       if (!statusStr || statusStr === "Waiting…") {
         statusPill.classList.add("neutral");
         statusShort.textContent = "Waiting…";
@@ -402,54 +498,81 @@
         return;
       }
 
+      // Fall/emergency state
       if (fall){
         statusPill.classList.add("bad");
         statusShort.textContent = "FALL";
         statusText.textContent = String(statusStr);
-      } else {
+      } 
+      // Normal / non-fall state
+      else {
         statusPill.classList.add("ok");
         statusShort.textContent = "OK";
         statusText.textContent = String(statusStr);
       }
     }
 
+    // ================= RESET UI =================
     function setPlaceholdersWaiting(){
+      // Reset displayed values if no usable data is available
       latVal.textContent = "—";
       lonVal.textContent = "—";
       timeText.textContent = "Waiting for time…";
       setStatusUI("Waiting…");
     }
 
+    // ================= FETCH DATA FROM BACKEND =================
     async function fetchData(){
       try{
+        // Send GET request to the backend
         const res = await fetch(ENDPOINT);
+
+        // Convert backend response into a JavaScript object
         const data = await res.json();
 
+        // If the backend returns nothing useful, show placeholder values
         if (!data || Object.keys(data).length === 0){
           setPlaceholdersWaiting();
           return;
         }
 
+        // Print coordinates onto the webpage
         latVal.textContent = (data.lat ?? "—");
         lonVal.textContent = (data.lon ?? "—");
+
+        // Print last fall time onto the webpage
         timeText.textContent = (data.lastFallTime ?? "—");
+
+        // Update the status card based on backend status text
         setStatusUI(data.status ?? "—");
 
+        // Text shown when clicking the map marker
         const popup = `ProxiCap+<br>${data.lastFallTime ?? ""}<br>(${data.lat ?? "—"}, ${data.lon ?? "—"})`;
 
+        // Move the map marker using latest coordinates
         updateMap(data.lat, data.lon, popup);
 
       } catch(err){
+        // If request fails, switch back to placeholder values
         setPlaceholdersWaiting();
       }
     }
 
+    // ================= AUTO REFRESH =================
+
+    // Request fresh backend data every few seconds
     setInterval(fetchData, POLL_MS);
+
+    // Request data immediately when page script starts
     fetchData();
 
+    // ================= PAGE LOAD =================
     window.addEventListener("load", () => {
+      // Wait until Leaflet is available before creating the map
       if (window.L) {
         initMap();
+
+        // Helps Leaflet render correctly once the page is visible
         if (map) map.invalidateSize();
       }
     });
